@@ -30,7 +30,7 @@ class Stock(object):
         Description: Getting stock prices for that FileName
         Output: list of Stock prices
         ''' 
-        cr = csv.reader(open("BBRY_2013-04-29.csv","r U"))
+        cr = csv.reader(open(FileName,"r U"))
         next(cr, None) # skip the header
         c1 = []
         for row in cr: # reading file from csv file    
