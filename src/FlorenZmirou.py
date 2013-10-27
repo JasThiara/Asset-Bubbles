@@ -19,6 +19,20 @@ class FlorenZmirou(object):
         self.Stock = stock
         self.GridPoints = self.GetGridPoints()
         self.EstimatedSigma = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.GridPoints]# these are the sigma values evulated at the grid points
+        self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
+    def GetCubicInterpolatedSigma(self):
+        '''
+        Description: It will give us cubic spline interpolation of sigma of grid points.
+        Output: Given a list of grid points and estimated sigma, spline(Points) is an object such that spline(Points) is the value of the spline interpolation through the points in grid points and estimated sigma
+        '''
+        N = len(self.GridPoints)
+        Points = []
+        for i in range(N):
+            x = self.GridPoints[i]
+            y = self.EstimatedSigma[i]
+            Points.append((x,y))
+        return spline(Points)
+
     def GetGridPoints(self):
         '''
         Description: It will make grid Points
