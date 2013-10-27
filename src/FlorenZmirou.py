@@ -18,6 +18,7 @@ class FlorenZmirou(object):
         '''
         self.Stock = stock
         self.GridPoints = self.GetGridPoints()
+        self.EstimatedSigma = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.GridPoints]# these are the sigma values evulated at the grid points
     def GetGridPoints(self):
         '''
         Description: It will make grid Points
