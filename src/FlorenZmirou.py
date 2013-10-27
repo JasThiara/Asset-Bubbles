@@ -26,10 +26,10 @@ class FlorenZmirou(GridAnalysis):
         Description: It will give us cubic spline interpolation of sigma of grid points.
         Output: Given a list of grid points and estimated sigma, spline(Points) is an object such that spline(Points) is the value of the spline interpolation through the points in grid points and estimated sigma
         '''
-        N = len(self.GridPoints)
+        N = len(self.UsableGridPoints)
         Points = []
         for i in range(N):
-            x = self.GridPoints[i]
+            x = self.UsableGridPoints[i]
             y = self.EstimatedSigma[i]
             Points.append((x,y))
         return spline(Points)
