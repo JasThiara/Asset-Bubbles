@@ -4,7 +4,8 @@ Created on Oct 27, 2013
 @author: Jas
 '''
 from sage.all import *
-class FlorenZmirou(object):
+import GridAnalysis
+class FlorenZmirou(GridAnalysis):
     '''
     FlorenZmirou will provide us list of sigma values and interpolation from list of stock prices
     '''
@@ -16,10 +17,10 @@ class FlorenZmirou(object):
         Discription: Step1: From stock, it will give us sigma(x)
                      Step2: Interpolate sigma(x) using step1.
         '''
-        self.Stock = stock
-        self.GridPoints = self.GetGridPoints()
+        super(FlorenZmirou,self).__init__(self,stock)
         self.EstimatedSigma = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.GridPoints]# these are the sigma values evulated at the grid points
         self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
+        
     def GetCubicInterpolatedSigma(self):
         '''
         Description: It will give us cubic spline interpolation of sigma of grid points.
@@ -33,15 +34,7 @@ class FlorenZmirou(object):
             Points.append((x,y))
         return spline(Points)
 
-    def GetGridPoints(self):
-        '''
-        Description: It will make grid Points
-        Output: Returns list of grid points
-        '''
-        self.n = len(self.Stock.StockPrices)
-        self.h_n= self.Derive_hn(self.Stock.StockPrices)
-        self.T = 60*n # 60 sec times total number of data points because T is every minute from [0,T]
-        self.x = self.Derive_x_values(self.Stock.StockPrices)
+   
     def Sublocal_Time(self,T,S,x,n,h_n):
         """
         funtion: Sublocal_time
