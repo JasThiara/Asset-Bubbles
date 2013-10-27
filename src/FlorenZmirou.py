@@ -3,7 +3,7 @@ Created on Oct 27, 2013
 
 @author: Jas
 '''
-
+from sage.all import *
 class FlorenZmirou(object):
     '''
     FlorenZmirou will provide us list of sigma values and interpolation from list of stock prices
@@ -17,6 +17,16 @@ class FlorenZmirou(object):
                      Step2: Interpolate sigma(x) using step1.
         '''
         self.Stock = stock
+        self.GridPoints = self.GetGridPoints()
+    def GetGridPoints(self):
+        '''
+        Description: It will make grid Points
+        Output: Returns list of grid points
+        '''
+        self.n = len(self.Stock.StockPrices)
+        self.h_n= self.Derive_hn(self.Stock.StockPrices)
+        self.T = 60*n # 60 sec times total number of data points because T is every minute from [0,T]
+        self.x = self.Derive_x_values(self.Stock.StockPrices)
     def Sublocal_Time(self,T,S,x,n,h_n):
         """
         funtion: Sublocal_time
