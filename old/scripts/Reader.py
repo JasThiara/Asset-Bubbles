@@ -1,5 +1,5 @@
 # It is not printing x values and sigma(x) like before
-from sage.all import *
+#from sage.all import *
 import csv
 from Sublocaltime import *
 def is_number(rowValue):
@@ -22,4 +22,5 @@ h_n= Derive_hn(c1)
 T = 60*n
 x = Derive_x_values(c1)
 Sigma = [Volatility_estimation(T,c1,ex,n,h_n) for ex in x]
-
+print  x
+print  Sigma
