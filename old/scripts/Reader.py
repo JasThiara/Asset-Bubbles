@@ -1,4 +1,4 @@
-
+# It is not printing x values and sigma(x) like before
 from sage.all import *
 import csv
 from Sublocaltime import *
