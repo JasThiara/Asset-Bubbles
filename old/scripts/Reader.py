@@ -1,3 +1,7 @@
+# This code is not printing x and sigma values anymore
+
+
+
 from sage.all import *
 import csv
 from Sublocaltime import *
