@@ -1,4 +1,4 @@
-# It is not printing grid points x values and sigma(x). It is giving me error about sage. Do you think it could be that we changed floren zmirou code?
+
 from sage.all import *
 import csv
 from Sublocaltime import *
