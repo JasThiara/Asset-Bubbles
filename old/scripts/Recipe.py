@@ -18,8 +18,8 @@ class Recipe(object):
                         if |Si-x|<h_n
                                step 2
                           else 0
-           step 4: if the ith grid point has less than Y percent of total data points, reject the grid point
-    Output: Count number of data points in each x_i
+        step 4: if the ith grid point has less than Y percent of total data points, reject the grid point
+   Output: Count number of data points in each x_i
 '''
     def __init__(selfparams):
         '''
