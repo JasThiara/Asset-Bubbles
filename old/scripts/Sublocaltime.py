@@ -73,6 +73,14 @@ def Indicator_function(condition):
     Description : (sigma i =1,n-1 1_{|S(s)-x)| < h_n})
     """
     return condition
+def Grid_Analysis(T,S,x,n,h_n):
+    sum = 0.0
+    for i in range(len(S)):
+        Sti = S[i]
+        absoluteValue = abs(Sti-x)
+        indicatorValue = Indicator_function(absoluteValue<h_n)
+        sum = sum+indicatorValue
+    return sum
 def Derive_hn(S):
     """
     Derive h_n function

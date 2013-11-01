@@ -22,5 +22,8 @@ h_n= Derive_hn(c1)
 T = 60*n
 x = Derive_x_values(c1)
 Sigma = [Volatility_estimation(T,c1,ex,n,h_n) for ex in x]
+NumberOfPoints = [Grid_Analysis(T,c1,ex,n,h_n)]
 print  x
 print  Sigma
+print NumberOfPoints
+
