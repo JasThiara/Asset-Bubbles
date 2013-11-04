@@ -111,7 +111,8 @@ def DoGridAnalysis(self,T,S,x,n,h_n,Y):
                     if abs(S[i]-x[m]<h_n):
                         S[i].append(x[m])
             for xj =x[m]:
-               
+                if S[i].append(x[m])>1%*len(x)
+                    
 
 def Derive_hn(S):
     """
