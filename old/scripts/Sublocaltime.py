@@ -103,16 +103,15 @@ def DoGridAnalysis(self,T,S,x,n,h_n,Y):
                2) for each usable grid point, the list of usable grid points
         n=len(S)
        '''
-           
-            for i in range len(S):
-                Sti = S[i]
-                for j in range of len(x):
-                    xj = x[m]
-                    if abs(S[i]-x[m]<h_n):
-                        S[i].append(x[m])
-            for xj =x[m]:
-                if S[i].append(x[m])>1%*len(x)
-                    
+    d = dict()
+    for i in range len(S):
+        Sti = S[i]
+            for j in range of len(x):
+                xj = x[m]
+            if abs(S[i]-x[m])<h_n:
+                d[i].append(j)
+                
+                
 
 def Derive_hn(S):
     """
