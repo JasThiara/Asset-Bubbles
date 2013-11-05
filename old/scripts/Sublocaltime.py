@@ -106,13 +106,12 @@ def DoGridAnalysis(self,T,S,x,n,h_n,Y):
     d = dict()
     x,S =d.key(),d.value()
     for i in range (len(x)):
-            for j in range of len(S):
-                d[j]=list()
-            if abs(x-S)<h_n:
-                d[j].append(i)
+            d[i] = len(x)
+                for j in range of len(S):
+                d[j]=len(S)
+                if abs(x-S)<h_n:
+                    d[j].append(S)
                 
-                
-
 def Derive_hn(S):
     """
     Derive h_n function
