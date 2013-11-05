@@ -105,11 +105,11 @@ def DoGridAnalysis(self,T,S,x,n,h_n,Y):
        '''
     d = dict()# Creating empty dictionary 
     x,S =d.key(),d.value()# Grid Point x is assigned as dictionary key and S is dictionary value 
-    for i in range (len(x)):# for i in length of x1,x2....xm
-        for j in range of len(S):# for j in range of S1,S2...Sn
-                d[j]=len()# adding key j and length pair to the dictionary 
+    for gridPoint in x:# for i in length of x1,x2....xm
+        for stockPrice in S:# for j in range of S1,S2...Sn
+                d[x]=len()# adding key j and length pair to the dictionary 
                 if abs(x-S)<h_n:# satisfying the condition if true then add ith x value to corresponding d[j]
-                    d[j].append(i)
+                    d[x].append(S)
                 
 def Derive_hn(S):
     """
