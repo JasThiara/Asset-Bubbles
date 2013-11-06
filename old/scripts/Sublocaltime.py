@@ -103,11 +103,11 @@ def DoGridAnalysis(T,S,x,n,h_n,Y):
                 2) for each usable grid point, the list of usable grid points
          n=len(S)
         '''
-      d = dict()# Creating empty dictionary 
+     d = dict()# Creating empty dictionary 
      x,S =d.key(),d.value()# Grid Point x is assigned as dictionary key and S is dictionary value 
      for gridPoint in x:# for loop for grid points x
          for stockPrice in S:# stock price in S
-             d[x]=[]# adding key x and length pair to the dictionary 
+             d[x]=list()# adding key x and length pair to the dictionary 
              if abs(x-S)<h_n:# satisfying the condition if true then add x value to corresponding Si
                  NumberofPoints= d[x].append(S)
          for gridPoint in x:
