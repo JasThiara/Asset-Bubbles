@@ -75,8 +75,8 @@ def Indicator_function(condition):
     return condition
 
 def DoGridAnalysis(T,S,x,n,h_n,Y):
-         '''
-     Input:1) T = Time from[0,T] which is for a day each mintue (60*n)
+    '''
+    Input:1) T = Time from[0,T] which is for a day each mintue (60*n)
           2) S = Stock prices
           3) x = Grid Points
           4) h_n = 1/n^(1/3)
@@ -103,19 +103,19 @@ def DoGridAnalysis(T,S,x,n,h_n,Y):
                 2) for each usable grid point, the list of usable grid points
          n=len(S)
         '''
-     d = dict()# Creating empty dictionary 
-     x,S =d.key(),d.value()# Grid Point x is assigned as dictionary key and S is dictionary value 
-     for gridPoint in x:# for loop for grid points x
-         for stockPrice in S:# stock price in S
-             d[x]=list()# adding key x and length pair to the dictionary 
-             if abs(x-S)<h_n:# satisfying the condition if true then add x value to corresponding Si
-                 NumberofPoints= d[x].append(S)
+    d = dict()# Creating empty dictionary 
+    x,S =d.key(),d.value()# Grid Point x is assigned as dictionary key and S is dictionary value 
+    for gridPoint in x:# for loop for grid points x
+        for stockPrice in S:# stock price in S
+            d[x]=list()# adding key x and length pair to the dictionary 
+            if abs(x-S)<h_n:# satisfying the condition if true then add x value to corresponding Si
+                NumberofPoints= d[x].append(S)
          return NumberofPoints
          for gridPoint in x:
              for Y in range(len(S)):
                  if Y % x > NumberofPoints:# NumberofPoints greater than Y% of total grid points in x
                      UsableGridPoints= NumberofPoints.append(S)#Adding to the list of usable grid points 
-     return UsableGridPoints 
+        return UsableGridPoints 
 def Derive_hn(S):
     """
     Derive h_n function
