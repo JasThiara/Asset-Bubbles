@@ -110,6 +110,7 @@ def DoGridAnalysis(T,S,x,n,h_n,Y):
              d[x]=list()# adding key x and length pair to the dictionary 
              if abs(x-S)<h_n:# satisfying the condition if true then add x value to corresponding Si
                  NumberofPoints= d[x].append(S)
+         return NumberofPoints
          for gridPoint in x:
              for Y in range(len(S)):
                  if Y % x > NumberofPoints:# NumberofPoints greater than Y% of total grid points in x
