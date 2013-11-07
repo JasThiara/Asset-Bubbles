@@ -24,7 +24,7 @@ class GridAnalysis(object):
         '''
         self.Stock = stock
         self.GridPoints = self.GetGridPoints()
-        self.UsableGridPoints= self.DoGridAnalysis()
+       
         
     def DoGridAnalysis(self,T,S,x,n,h_n,Y):
         '''
@@ -54,7 +54,7 @@ class GridAnalysis(object):
    Output: 1) the list of usable grid points
                2) for each usable grid point, the list of usable grid points
         n=len(S)
-        '''
+        
             Sum = 0.0
             for i in range len(S):
                 Sti = S[i]
@@ -62,9 +62,5 @@ class GridAnalysis(object):
                     xj = x[m]
                     if abs(S[i]-x[m]<h_n):
                         sum+S[i]
-                    else nothing
-                    
-                        
-                        
-            
-        
+                    else nothing    
+'''

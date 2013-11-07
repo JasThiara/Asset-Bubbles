@@ -21,9 +21,13 @@ n = len(c1)
 h_n= Derive_hn(c1)
 T = 60*n
 x = Derive_x_values(c1)
+Y = 0.01*n
 Sigma = [Volatility_estimation(T,c1,ex,n,h_n) for ex in x]
-print  x
-print  Sigma
+usableGridPoints = DoGridAnalysis(T,c1,x,n,h_n,Y)
+print x
+print Sigma
+print usableGridPoints
+
 
 
 
