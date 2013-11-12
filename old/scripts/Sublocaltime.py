@@ -6,27 +6,27 @@ Created on Mar 31, 2013
 
 
 def Sublocal_Time(T,S,x,n,h_n):
-       """
-       funtion: Sublocal_time
-       input:T is time period 
-             1) stock price (s(t1).......s(tn))= S
-             2) x values in [0,infinity)
-             3) n , h_n
-       outout L_T^n(x)
-       
-       Description: L_T^n(x) = (T/ 2nh_n) sigma i =1,n 1_{|s_t(i)-x)| < h_n}
+    """
+    funtion: Sublocal_time
+    input:T is time period 
+          1) stock price (s(t1).......s(tn))= S
+          2) x values in [0,infinity)
+          3) n , h_n
+    outout L_T^n(x)
     
-       """
-       sum = 0.0
-       scalar = T/(2.0*n*h_n)
-       for i in range(len(S)):
-            Sti = S[i]
-            absoluteValue = abs(Sti-x)
-            indicatorValue = Indicator_function(absoluteValue<h_n)
-            sum = sum+indicatorValue
-       return scalar*sum
+    Description: L_T^n(x) = (T/ 2nh_n) sigma i =1,n 1_{|s_t(i)-x)| < h_n}
+    
+    """
+    sum = 0.0
+    scalar = T/(2.0*n*h_n)
+    for i in range(len(S)):
+        Sti = S[i]
+        absoluteValue = abs(Sti-x)
+        indicatorValue = Indicator_function(absoluteValue<h_n)
+        sum = sum+indicatorValue
+    return scalar*sum
+    
 
-       
 def Local_time(T,S,x,n,h_n):
     """
     funtion: Local_time
@@ -74,48 +74,53 @@ def Indicator_function(condition):
     """
     return condition
 
-#def DoGridAnalysis(T,S,x,n,h_n,Y):
-#         '''
-#     Input:1) T = Time from[0,T] which is for a day each mintue (60*n)
-#          2) S = Stock prices
-#          3) x = Grid Points
-#          4) h_n = 1/n^(1/3)
-#          5) n = Number of stock data points
-#          6) Y =  Y percent of total data points
-#     Ingredients: 1) S_(ti), 
-#                  2) indicator function, 
-#                  3) grid points, 
-#                  4) a dictionary where the keys are the grid points and the value is a list for each grid point (used in Step 2)
-#     Description : sigma i =1,n-1 1_{|s_t(i)-x)| < h_n} = *
-#     Recipe:           step1: 
-#                           for Si in S1,S2....Sn:
-#                                for x in X1,X2...Xm:
-#                                   if |Si-x|<h_n:
-#                                     step 2: 
-#                                     Add Si into list corresponding to x
-#                            Step 3:
-#                            for x in X1, X2,...,Xm: 
-#                                 if the list of data points corresponding to x has greater than Y% of total grid points n:
-#                                      add it to the list of usable grid points
-#                            Step 4:
-#                            return the outputs
-#    Output: 1) the list of usable grid points
-#                2) for each usable grid point, the list of usable grid points
-#         n=len(S)
-#        '''
-#     d = dict()# Creating empty dictionary 
-#     x,S =d.key(),d.value()# Grid Point x is assigned as dictionary key and S is dictionary value 
-#     for gridPoint in x:# for loop for grid points x
-#         for stockPrice in S:# stock price in S
-#             d[x]=list()# adding key x and length pair to the dictionary 
-#             if abs(x-S)<h_n:# satisfying the condition if true then add x value to corresponding Si
-#                 NumberofPoints= d[x].append(S)
-#         return NumberofPoints
-#         for gridPoint in x:
-#             for Y in range(len(S)):
-#                 if Y % x > NumberofPoints:# NumberofPoints greater than Y% of total grid points in x
-#                     UsableGridPoints= NumberofPoints.append(S)#Adding to the list of usable grid points 
-#     return UsableGridPoints 
+
+def DoGridAnalysis(T,S,x,n,h_n,Y):
+    '''
+    Input:1) T = Time from[0,T] which is for a day each mintue (60*n)
+          2) S = Stock prices
+          3) x = Grid Points
+          4) h_n = 1/n^(1/3)
+          5) n = Number of stock data points
+          6) Y =  Y percent of total data points
+     Ingredients: 1) S_(ti), 
+                  2) indicator function, 
+                  3) grid points, 
+                  4) a dictionary where the keys are the grid points and the value is a list for each grid point (used in Step 2)
+     Description : sigma i =1,n-1 1_{|s_t(i)-x)| < h_n} = *
+     Recipe:           step1: 
+                           for Si in S1,S2....Sn:
+                                for x in X1,X2...Xm:
+                                   if |Si-x|<h_n:
+                                     step 2: 
+                                     Add Si into list corresponding to x
+                            Step 3:
+                            for x in X1, X2,...,Xm: 
+                                 if the list of data points corresponding to x has greater than Y% of total grid points n:
+                                      add it to the list of usable grid points
+                            Step 4:
+                            return the outputs
+    Output: 1) the list of usable grid points
+                2) for each usable grid point, the list of usable grid points
+         n=len(S)
+       '''
+    usableGridPoints = x
+    d = dict()# Creating empty dictionary
+    stockPriceCount = float(len(S)) 
+    for gridPoint in x:# The grid points are your keys
+        d[gridPoint]=list()#a dictionary where the keys are the grid points and the value is a list for each grid point (used in Step 2)
+        for stockPrice in S:# stock price in S    
+            if  abs(gridPoint-stockPrice)<h_n:# satisfying the condition if true then add x value to corresponding Si
+                d[gridPoint].append(stockPrice)#Note the number of points for the gridPoint is len(d[gridPoint])
+    for gridPoint in x:
+        listOfPointsForGridPoint = d[gridPoint]
+        numberOfPointsInList = float(len(listOfPointsForGridPoint))
+        percentOfStockPrices = numberOfPointsInList / stockPriceCount
+        if  percentOfStockPrices < Y:# We just want to remove the number grid points from the dictionary since we have all data.
+            d.pop(gridPoint)#pop(key[, default]) If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.
+            usableGridPoints.pop(gridPoint)
+    return usableGridPoints, d# 1) the list of usable grid points 2) for each usable grid point, the list of usable grid points
+
 def Derive_hn(S):
     """
     Derive h_n function
