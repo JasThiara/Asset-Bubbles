@@ -10,7 +10,7 @@ from FlorenZmirou import *
 from AssetBubble import *
 if __name__ == '__main__':
     m = 1
-    BBRY = Stock("../old/scripts/BBRY_2013-04-29.csv")# or "..\scripts\csv\[TICKER]_YYYY-MM-DD.csv"
+    BBRY = Stock("../old/scripts/BBRY_2013-04-29.csv")# or "../scripts/csv/[TICKER]_YYYY-MM-DD.csv"
     High = BBRY.GetMaxStockPrice()
     Low = BBRY.GetMinStockPrice()
     StepSize = float(High-Low)/100.0
