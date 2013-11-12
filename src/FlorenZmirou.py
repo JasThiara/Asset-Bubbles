@@ -16,7 +16,7 @@ class FlorenZmirou(object):
         self.n = len(self.Stock.StockPrices)
         self.h_n= self.Derive_hn(self.Stock.StockPrices)
         self.T = 60*self.n # 60 sec times total number of data points because T is every minute from [0,T]
-        self.x = self.Derive_x_values(self.Stock.StockPrices)
+        return self.Derive_x_values(self.Stock.StockPrices)
     
     
     def __init__(self,stock):
@@ -27,7 +27,7 @@ class FlorenZmirou(object):
         '''
         self.Stock = stock
         self.GridPoints = self.GetGridPoints()
-        self.UsableGridPoints= self.DoGridAnalysis()
+        self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.Stock.StockPrices,self.GridPoints,self.n,self.h_n,.05)
         self.EstimatedSigma = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.GridPoints]# these are the sigma values evulated at the grid points
         self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
         
@@ -133,7 +133,7 @@ class FlorenZmirou(object):
         outout x grid points
         Description: trying to create step size to generate x
         """
-        h_n = self.Derive_hn(self,S)
+        h_n = self.Derive_hn(S)
         doubleh_n = 2*h_n
         Difference= max(S)-min(S)
         x_hn =Difference*doubleh_n
@@ -143,11 +143,11 @@ class FlorenZmirou(object):
         """
      
         input:
-               stock price (s(t1).......s(tn))= S
+               stock price (string as file location pythons(t1).......s(tn))= S
         outout x values
         Description: Derive x grid points
         """
-        x_hn = self.x_step_size(self,S)
+        x_hn = self.x_step_size(S)
         halfh_n = x_hn/2.0
         x = list()
         x.append(min(S)+halfh_n)
@@ -184,7 +184,7 @@ class FlorenZmirou(object):
                                Step 4:
                                return the outputs
         Output: 1) the list of usable grid points
-                   2) for each usable grid point, the list of usable grid points
+                   2) for each usable grid point, the list of stockprices
             n=len(S)
         '''
         usableGridPoints = x

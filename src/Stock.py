@@ -8,7 +8,16 @@ class Stock(object):
     '''
     Stock class will read a csv file provide a list of stock prices 
     '''
-    
+    def GetMaxStockPrice(self):
+        '''
+        Output Description: returns the largest recorded StockPrice
+        '''
+        return max(self.StockPrices)
+    def GetMinStockPrice(self):
+        '''
+        Output Description: returns the smallest recorded StockPrice
+        '''
+        return min(self.StockPrices)
     def IsNumber(self,rowValue):
         ''' Please use/call this method in your script below to determine if row[1] is a numerical string or not.'''
         try:
