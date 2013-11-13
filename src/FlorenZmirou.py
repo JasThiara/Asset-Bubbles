@@ -29,6 +29,8 @@ class FlorenZmirou(object):
         self.GridPoints = self.GetGridPoints()
         self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.Stock.StockPrices,self.GridPoints,self.n,self.h_n,.05)
         self.EstimatedSigma = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.GridPoints]# these are the sigma values evulated at the grid points
+        self.EstimatedVariance = [i*i for i in self.EstimatedSigma]
+        self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
         self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
         
     def GetCubicInterpolatedSigma(self):

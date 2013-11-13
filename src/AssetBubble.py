@@ -8,16 +8,7 @@ class AssetBubble(object):
     '''
     Deciding whether and extrapolation is required
     '''
-    def InverseVariance(self,x):
-        '''
-        Input: x = some grid point
-        Output: returns 1/sigma(x)^2
-        '''
-        Sigma = self.FlorenZmirou.CubicInterpolatedSigma
-        SigmaX = Sigma(x)
-        VarianceX = SigmaX*SigmaX
-        InverseVariance = 1/VarianceX
-        return InverseVariance
+
     def __init__(self,FlorenZmirouObject):
         '''
         Input: FloremZmirouObject= FlorenZmirou Class
@@ -26,8 +17,7 @@ class AssetBubble(object):
                      Step3: Determine if asset is bubble
         '''
         self.FlorenZmirou = FlorenZmirouObject
-        self.InverseVariance = [self.InverseVariance(x) for x in self.FlorenZmirou.UsableGridPoints]
-    
+        
     def BetaFunction(self,m,n):
         '''
         Input: n,m = Number
