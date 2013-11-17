@@ -4,6 +4,7 @@ Created on Oct 27, 2013
 @author: Jas
 '''
 from sage.all import *
+
 class AssetBubble(object):
     '''
     Deciding whether and extrapolation is required
@@ -89,5 +90,3 @@ class AssetBubble(object):
         z = float(xSmall/xLarge)
         GaussValue = self.HyperGeometricFunction(a,b,c,z)
         return nSquared*coeficient2*BetaValue*GaussValue
-        
-        

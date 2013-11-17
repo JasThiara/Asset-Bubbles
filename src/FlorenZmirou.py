@@ -4,6 +4,9 @@ Created on Oct 27, 2013
 @author: Jas
 '''
 from sage.all import *
+import locale
+import sys
+locale.setlocale(locale.LC_NUMERIC, "")
 class FlorenZmirou(object):
     '''
     FlorenZmirou will provide us list of sigma values and interpolation from list of stock prices
@@ -202,6 +205,57 @@ class FlorenZmirou(object):
             numberOfPointsInList = float(len(listOfPointsForGridPoint))
             percentOfStockPrices = numberOfPointsInList / stockPriceCount
             if  percentOfStockPrices < Y:# We just want to remove the number grid points from the dictionary since we have all data.
-                d.pop(gridPoint)#pop(key[, default]) If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.
-                usableGridPoints.pop(gridPoint)
+                usableGridPoints.remove(gridPoint)
+                del d[gridPoint]#pop(key[, default]) If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.
         return usableGridPoints, d# 1) the list of usable grid points 2) for each usable grid point, the list of usable grid points
+    
+    def format_num(self,num):
+        """
+        Format a number according to given places.
+        Adds commas, etc. Will truncate floats into ints!
+        """
+        try:
+            inum = int(num)
+            return locale.format("%.*f", (0, inum), True)
+    
+        except (ValueError, TypeError):
+            return str(num)
+        
+    def get_max_width(self,table, index):
+        """Get the maximum width of the given column index"""
+        return max([len(self.format_num(row[index])) for row in table])
+    
+    def pprint_table(self,out, table):
+        """Prints out a table of data, padded for alignment
+        @param out: Output stream (file-like object)
+        @param table: The table to print. A list of lists.
+        Each row must have the same number of columns. 
+        """
+        col_paddings = []
+        for i in range(len(table[0])):
+            col_paddings.append(self.get_max_width(table, i))
+        for row in table:
+            # left col
+            print >> out, row[0].ljust(col_paddings[0] + 1),
+            # rest of the cols
+            for i in range(1, len(row)):
+                col = self.format_num(row[i]).rjust(col_paddings[i] + 2)
+                print >> out, col,
+            print >> out
+            
+    def CreateZmirouTable(self):
+        '''
+        #1.3) create table with the following:
+        #1.3.1) Usable Grid Points
+        #1.3.2) Estimated Sigma value from Floren Zmirou Estimator
+        #1.3.3) Number of Points for each Grid Point
+        '''
+        table= []
+        columnNames = ["Usable Grid Points", "Estimated Sigma Zmirou", "Number of Points"]
+        table.append(columnNames)
+        gridPoints = self.UsableGridPoints
+        estimatedSigma = self.EstimatedSigma
+        for i in range(len(gridPoints)):
+            table.append([str(gridPoints[i]), str(estimatedSigma[i]), str(len(self.StockPricesByGridPointDictionary[gridPoints[i]]))])
+        out = sys.stdout
+        return self.pprint_table(out, table)

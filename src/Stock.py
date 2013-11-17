@@ -5,6 +5,7 @@ Created on Oct 27, 2013
 '''
 import csv
 import urllib 
+import time
 class Stock(object):
     '''
     Stock class will read a csv file provide a list of stock prices 
@@ -34,10 +35,16 @@ class Stock(object):
         2)the second element in the list is the historical data period, e.g. 10
         3)the third element in the list is the period of data in seconds, e.g. 60 (seconds)
         '''
-        link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s'%(Parameters[2],Parameters[1],Parameters[0])
+        if len(Parameters[0]) ==  3:
+            exchange = 'NYSE'
+        else:
+            exchange = 'NASD'
+        currentTime = int(time.time())
+        link = 'http://www.google.com/finance/getprices?q=%s&x=%s&i=%d&p=%dd&f=d,c,o,h,l&df=cpct&auto=1&ts=%d'%(Parameters[0].upper(),exchange,Parameters[2],Parameters[1],currentTime)
+#        link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
         filePtr = urllib.urlopen(link)
         DataList = filePtr.readlines()
-        tickerData = DataList[7:-1]
+        tickerData = DataList[7:len(DataList)]
         stockPrices = []
         for minuteData in tickerData:
             datum = minuteData.split(',')
@@ -64,7 +71,7 @@ class Stock(object):
         ''' 
         if 'filename' in kwds:
             self.StockPrices=self.GetStockPrices(kwds['filename'])
-        if 'tickerParams' in kwds:
+        elif 'tickerParams' in kwds:
             self.StockPrices=self.GetGoogleData(kwds['tickerParams'])
         else:
             raise Exception("bad paramaters")
