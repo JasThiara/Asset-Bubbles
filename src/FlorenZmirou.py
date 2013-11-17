@@ -105,7 +105,10 @@ class FlorenZmirou(object):
         
         Description: S_n(x) = (l_T^n(x))/(sigma i =1,n-1 1_{|s_t(i)-x)| < h_n})
         """
-        return self.Local_time(T,S,x,n,h_n)/self.Sublocal_Time(T,S,x,n,h_n)
+        localTime = self.Local_time(T,S,x,n,h_n)
+        sublocalTime = self.Sublocal_Time(T,S,x,n,h_n)
+        ratio = localTime/sublocalTime
+        return ratio
     
     def Indicator_function(self,condition):
         """
@@ -128,7 +131,7 @@ class FlorenZmirou(object):
         Description: 1/n^(1/3)
         """
         n = len(S)
-        h_n = 1/n**(1.0/3.0)
+        h_n = 1.0/n**(1.0/3.0)
         return h_n
     def x_step_size(self,S):
         """
@@ -139,7 +142,7 @@ class FlorenZmirou(object):
         Description: trying to create step size to generate x
         """
         h_n = self.Derive_hn(S)
-        doubleh_n = 2*h_n
+        doubleh_n = 2.0*h_n
         Difference= max(S)-min(S)
         x_hn =Difference*doubleh_n
         return x_hn
