@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #1.3.4) Plot cubic spline interpolation of sigma
     #1.4)Extrapolate sigma_b if necessary
 #    tickerData = Stock(filename="../old/scripts/csv/CLF_2013-04-29.csv")#part 0
-    Params = ['lmt',10,60]
+    Params = ['aapl',10,60]
     tickerData = Stock(tickerParams=Params)#part 0
     tickerMax = tickerData.GetMaxStockPrice()#xmax
     tickerMin = tickerData.GetMinStockPrice()#xmin
