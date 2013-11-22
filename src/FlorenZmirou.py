@@ -35,7 +35,7 @@ class FlorenZmirou(object):
         self.EstimatedVariance = [i*i for i in self.EstimatedSigma]
         self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
         self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
-        
+ #_________________________________________________________________________________       
     def GetCubicInterpolatedSigma(self):
         '''
         Description: It will give us cubic spline interpolation of sigma of grid points.
@@ -49,7 +49,7 @@ class FlorenZmirou(object):
             Points.append((x,y))
         return spline(Points)
 
-   
+#_______________________________________________________________________________
     def Sublocal_Time(self,T,S,x,n,h_n):
         """
         funtion: Sublocal_time
@@ -121,6 +121,7 @@ class FlorenZmirou(object):
         Description : (sigma i =1,n-1 1_{|S(s)-x)| < h_n})
         """
         return condition
+#___________________________________________________________________________________
     def Derive_hn(self,S):
         """
         Derive h_n function
@@ -165,7 +166,7 @@ class FlorenZmirou(object):
             ex = ex+x_hn
             x.append(ex)
         return x
-        
+ #---------------------------------------------------------------------------------       
     def DoGridAnalysis(self,T,S,x,n,h_n,Y):
         '''
         Input:1) T = Time from[0,T] which is for a day each mintue (60*n)
@@ -211,7 +212,7 @@ class FlorenZmirou(object):
                 usableGridPoints.remove(gridPoint)
                 del d[gridPoint]#pop(key[, default]) If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.
         return usableGridPoints, d# 1) the list of usable grid points 2) for each usable grid point, the list of usable grid points
-    
+ #--------------------------------------------------------------------------------------------   
     def format_num(self,num):
         """
         Format a number according to given places.

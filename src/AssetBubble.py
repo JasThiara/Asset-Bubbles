@@ -10,9 +10,10 @@ class AssetBubble(object):
     Deciding whether and extrapolation is required
     '''
 
-    def __init__(self,FlorenZmirouObject,alpha,m):
+    def __init__(self,FlorenZmirouObject,alpha,m,n):
         '''
         Input: 
+        n                     = "take the nth derivative of f"
         FloremZmirouObject    = FlorenZmirou Class
         alpha                 = regularization parameter that imposes proper balance between the residual constraint ||Qf-F|| and the magnitude constraint ||f||
         m                     = (integer value) "take the mth derivative of f"
@@ -20,9 +21,11 @@ class AssetBubble(object):
                      Step2: If true Then Extrapolate
                      Step3: Determine if asset is bubble
         '''
+        self.n = n
         self.FlorenZmirou = FlorenZmirouObject
         self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance,alpha,m)
         self.fAlpha = self.RegularizedInverseVariance(self.fAlphaCoefficients,m)
+        self.fExtrapolationEstimate = self.Proposition3(m,n)
         
     def RegularizedInverseVariance(self,fAlphaCoefficients,m):
         '''
@@ -115,6 +118,19 @@ class AssetBubble(object):
         xValues = self.frange(xMin, xMax, xStepSize)
         fValues = [(fAlphaCoefficientSum * nSquared * betaValue) / x**(m+1) for x in xValues]
         return fValues
+        
+    def Prosition3(self,m,n):
+        '''
+        input:
+        m = mth derivative
+        n = nth derivative
+        output:
+        a vector of extrapolated values based on Proposition 3 of "how to detect asset bubbles" 
+        '''
+        nSquare = n * n
+        betaValue = self.BetaFunction(m+1, n)
+        sumCoefficients = sum(self.fAlphaCoefficients)
+        #if the interpolated range, [a,b], the extrapolated range is [b, b + (b-a)]:
         
     @staticmethod
     def frange(x, y, jump):

@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #1.3.4) Plot cubic spline interpolation of sigma
     #1.4)Extrapolate sigma_b if necessary
 #    tickerData = Stock(filename="../old/scripts/csv/CLF_2013-04-29.csv")#part 0
-    Params = ['aapl',10,60]
+    Params = ['lnkd',1,60]
     tickerData = Stock(tickerParams=Params)#part 0
     tickerMax = tickerData.GetMaxStockPrice()#xmax
     tickerMin = tickerData.GetMinStockPrice()#xmin
@@ -38,6 +38,7 @@ if __name__ == '__main__':
     sigmaValues = []
     for x in tickerRange:
         sigmaValues.append((x,sigma(x)))
+    #fValues = 1.0/(sigmaValues[:,1]**2)
     sigmaValuesMax = max([sigmaValue[1] for sigmaValue in sigmaValues if not math.isnan(sigmaValue[1])])#ymax
     sigmaValuesMin = min([sigmaValue[1] for sigmaValue in sigmaValues if not math.isnan(sigmaValue[1])])#ymin
     sigmaGraph = list_plot(sigmaValues,plotjoined=True,xmax=tickerMax+1,xmin=tickerMin-1,ymax=sigmaValuesMax+1,ymin=sigmaValuesMin-1)

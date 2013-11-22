@@ -21,7 +21,7 @@ class Stock(object):
         '''
         return min(self.StockPrices)
     def IsNumber(self,rowValue):
-        ''' Please use/call this method in your script below to determine if row[1] is a numerical string or not.'''
+        ''' Output Description: Determine if rows of stock data is a numerical string or not.'''
         try:
             float(rowValue)
             return True
@@ -32,16 +32,17 @@ class Stock(object):
         Input
         Parameters = [ticker,days,period]
         1)the first element in the list is a string of the ticker symbol, e.g. 'appl'
-        2)the second element in the list is the historical data period, e.g. 10
+        2)the second element in the list is the historical data period, e.g. 10 days
         3)the third element in the list is the period of data in seconds, e.g. 60 (seconds)
         '''
-        if len(Parameters[0]) ==  3:
+        if len(Parameters[0]) <=  3:
             exchange = 'NYSE'
         else:
             exchange = 'NASD'
         currentTime = int(time.time())
         link = 'http://www.google.com/finance/getprices?q=%s&x=%s&i=%d&p=%dd&f=d,c,o,h,l&df=cpct&auto=1&ts=%d'%(Parameters[0].upper(),exchange,Parameters[2],Parameters[1],currentTime)
-#        link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
+# q = ticker, x = exchange, i = 60 seconds, p = days 
+#       link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
         filePtr = urllib.urlopen(link)
         DataList = filePtr.readlines()
         tickerData = DataList[7:len(DataList)]
@@ -75,7 +76,9 @@ class Stock(object):
             self.StockPrices=self.GetGoogleData(kwds['tickerParams'])
         else:
             raise Exception("bad paramaters")
-            
+        self.maxPrice = self.GetMaxStockPrice()
+        self.minPrice = self.GetMinStockPrice()
+        
         
     def GetStockPrices(self,FileName): 
         '''
