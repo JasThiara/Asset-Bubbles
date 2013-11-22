@@ -24,36 +24,38 @@ class AssetBubble(object):
         self.n = n
         self.FlorenZmirou = FlorenZmirouObject
         self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance,alpha,m)
-        self.fAlpha = self.RegularizedInverseVariance(self.fAlphaCoefficients,m)
-        self.fExtrapolationEstimate = self.Proposition3(m,n)
+        self.fAlpha = self.RegularizedInverseVariance(self.fAlphaCoefficients,m,n)
+        self.fExtrapolationEstimate, self.fExtrapolatedSpline = self.Proposition3(m,n)
         
-    def RegularizedInverseVariance(self,fAlphaCoefficients,m):
+    def RegularizedInverseVariance(self,fAlphaCoefficients,m,n):
         '''
         Input:
             fAlphaCoefficients = Coefficents solved from equation 11 in 'How to detect an asset bubble'
             m = (integer value) "take the mth derivative of f"
+            n = (integer value) "take the nth derivative of f"
         Output:
             fAlpha = Q * c
         Description:
         Computes equation (10) in 'how to detect an asset bubble'
         '''
-        QArray = [[self.ReproducingKernalFunction(2,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
+        QArray = [[self.ReproducingKernalFunction(n,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
         Q = matrix(QArray)
         fAlpha = Q * fAlphaCoefficients
         return fAlpha
     
-    def RegularizedSolution(self,f,alpha,m):
+    def RegularizedSolution(self,f,alpha,m,n):
         '''
         Input:
         f = inverse variance
         alpha = regularization parameter that imposes proper balance between the residual constraint ||Qf-F|| and the magnitude constraint ||f||
         m = (integer value) "take the mth derivative of f"
+        n = (integer value) "take the nth derivative of f"
         Output:
         c_i^\alpha = the coefficients of equation (10) in "how to detect an asset bubble"
         Description:
         Solves c_alpha found in equation (11) in 'how to detect an asset bubble'
         '''
-        QArray = [[self.ReproducingKernalFunction(2,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
+        QArray = [[self.ReproducingKernalFunction(n,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
         Q = matrix(QArray)
         identityMatrix = matrix.identity(Q.nrows())
         QAlphaM = Q + alpha * identityMatrix
@@ -125,13 +127,26 @@ class AssetBubble(object):
         m = mth derivative
         n = nth derivative
         output:
-        a vector of extrapolated values based on Proposition 3 of "how to detect asset bubbles" 
+        1)    a vector of extrapolated values based on Proposition 3 of "how to detect asset bubbles"
+              vector is f_alpha (x) for x in srange(maxPrice, maxPrice + priceRange,h_n)
+        2)    A spline based off of output (1), i.e. spline( (x,f_alpha(x)) for x in srange(maxPrice, maxPrice + priceRange,h_n))
         '''
         nSquare = n * n
         betaValue = self.BetaFunction(m+1, n)
         sumCoefficients = sum(self.fAlphaCoefficients)
+        constant = nSquare * betaValue * sumCoefficients
         #if the interpolated range, [a,b], the extrapolated range is [b, b + (b-a)]:
-        
+        minPrice = self.FlorenZmirou.Stock.minPrice
+        maxPrice = self.FlorenZmirou.Stock.maxPrice
+        priceRange = maxPrice - minPrice
+        h_n = self.FlorenZmirou.h_n
+        extrapolatedDomain = [x for x in srange(maxPrice, maxPrice + priceRange,h_n)]
+        extrapolatedRange = [constant/(x**(m+1)) for x in extrapolatedDomain]
+        crossProduct = list()
+        for i in range(len(extrapolatedDomain)):
+            crossProduct.append((extrapolatedDomain[i],extrapolatedRange[i]))
+        return extrapolatedRange, spline(crossProduct)
+    
     @staticmethod
     def frange(x, y, jump):
         l = list()
