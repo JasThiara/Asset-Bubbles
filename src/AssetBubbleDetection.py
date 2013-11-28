@@ -24,9 +24,14 @@ class AssetBubbleDetection(object):
     '''
     @staticmethod
     def SortingFunction(AB):
+        '''
+        method for sorting asset bubbles
+        '''
         interpolatedDerivative = AB.FlorenZmirou.CubicInterpolatedSigma.derivative(AB.FlorenZmirou.Stock.maxPrice)
         extrapolatedDerivative = AB.fExtrapolatedSpline.derivative(AB.FlorenZmirou.Stock.maxPrice)
         return abs( interpolatedDerivative - extrapolatedDerivative )
+        
+    def DetermineAssetBubble(self):
         
 
     def __init__(self,FZ):
@@ -38,17 +43,22 @@ class AssetBubbleDetection(object):
         1) Builds the assetBubbleList [AB1, AB2,...., AB(mMax*nMax)] as in the description
         2) Needs to sort assetBubbleList by abs( ABi.FlorenZmirou.CubicInterpolatedSigma.derivative(ABi.FlorenZmirou.Stock.maxPrice) - (ABi.fExtrapolatedSpline.derivative(ABi.FlorenZmirou.Stock.maxPrice))
         2.1) (2) is finding the best extrapolation function in assetBubbleList that has the closest derivate to the interpolated function
+        3) Builds plot of interpolated function and the best extrapolated function
+        4) determines the asset bubble
         '''
         self.assetBubbleList = list()
         self.mMax = 10
         self.nMax = 4
-        for m in range(1,self.mMax):
+        self.mList = range(1,self.mMax).extend(srange(0.5,1,.05))
+        for m in self.mList:
             for n in range(1,self.nMax):
                 self.assetBubbleList.append(AssetBubble(FZ,m,n))
         self.assetBubbleList = sorted(self.assetBubbleList,key=lambda AB: AssetBubbleDetection.SortingFunction(AB))
         self.AssetBubbleModel = self.assetBubbleList[0]
         self.interpolatedFunction = self.AssetBubbleModel.FlorenZmirou.CubicInterpolatedSigma     
         self.extrapolatedFunction = self.AssetBubbleModel.fExtrapolatedSpline
-        self.interpolatedRange = #tuple
-        self.extrapolatedRange = #tuple
+        self.interpolatedDomain = self.AssetBubbleModel.FlorenZmirou.InterpolatedRange
+        self.extrapolatedDomain = self.AssetBubbleModel.extrapolatedPlotDomain
+        self.inverseVariancePlot = plot(self.interpolatedFunction,self.interpolatedDomain,color=(0,0,1)) + plot(self.extrapolatedFunction,self.extrapolatedDomain,color=(1,0,0))
+        self.isAssetBubble = self.DetermineAssetBubble()
         
