@@ -35,6 +35,7 @@ class FlorenZmirou(object):
         self.EstimatedVariance = [i*i for i in self.EstimatedSigma]
         self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
         self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
+        self.InterpolatedRange = (self.Stock.minPrice,self.Stock.maxPrice)
  #_________________________________________________________________________________       
     def GetCubicInterpolatedSigma(self):
         '''

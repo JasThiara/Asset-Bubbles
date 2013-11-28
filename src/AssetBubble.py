@@ -27,7 +27,7 @@ class AssetBubble(object):
         self.FlorenZmirou = FlorenZmirouObject
         self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance)
         self.fAlpha = self.RegularizedInverseVariance(self.fAlphaCoefficients,m,n)
-        self.fExtrapolationEstimate, self.fExtrapolatedSpline = self.Proposition3(m,n)
+        self.extrapolatedPlotDomain, self.fExtrapolationEstimate, self.fExtrapolatedSpline = self.Proposition3(m,n)
         
         
     def RegularizedInverseVariance(self,fAlphaCoefficients,m,n):
@@ -144,11 +144,12 @@ class AssetBubble(object):
         priceRange = maxPrice - minPrice
         h_n = self.FlorenZmirou.h_n
         extrapolatedDomain = [x for x in srange(maxPrice, maxPrice + priceRange,h_n)]
+        extrapolatedDomainPlotRange = (min(extrapolatedDomain), max(extrapolatedDomain))
         extrapolatedRange = [constant/(x**(m+1)) for x in extrapolatedDomain]
         crossProduct = list()
         for i in range(len(extrapolatedDomain)):#check if usablegridpoints is the same size as the extrapolated domain
             crossProduct.append((extrapolatedDomain[i],extrapolatedRange[i]))
-        return extrapolatedRange, spline(crossProduct)
+        return extrapolatedDomainPlotRange,extrapolatedRange, spline(crossProduct)
     
     @staticmethod
     def frange(x, y, jump):

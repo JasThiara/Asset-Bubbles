@@ -45,5 +45,10 @@ class AssetBubbleDetection(object):
         for m in range(1,self.mMax):
             for n in range(1,self.nMax):
                 self.assetBubbleList.append(AssetBubble(FZ,m,n))
-        sorted(self.assetBubbleList,key=lambda AB: abs())                
+        self.assetBubbleList = sorted(self.assetBubbleList,key=lambda AB: AssetBubbleDetection.SortingFunction(AB))
+        self.AssetBubbleModel = self.assetBubbleList[0]
+        self.interpolatedFunction = self.AssetBubbleModel.FlorenZmirou.CubicInterpolatedSigma     
+        self.extrapolatedFunction = self.AssetBubbleModel.fExtrapolatedSpline
+        self.interpolatedRange = #tuple
+        self.extrapolatedRange = #tuple
         
