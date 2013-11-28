@@ -10,7 +10,7 @@ class AssetBubble(object):
     Deciding whether and extrapolation is required
     '''
 
-    def __init__(self,FlorenZmirouObject,alpha,m,n):
+    def __init__(self,FlorenZmirouObject,m,n):
         '''
         Input: 
         n                     = "take the nth derivative of f"
@@ -22,10 +22,13 @@ class AssetBubble(object):
                      Step3: Determine if asset is bubble
         '''
         self.n = n
+        self.m = m
+        self.alpha = float(1 + m) / 2.0
         self.FlorenZmirou = FlorenZmirouObject
-        self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance,alpha,m)
+        self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance)
         self.fAlpha = self.RegularizedInverseVariance(self.fAlphaCoefficients,m,n)
         self.fExtrapolationEstimate, self.fExtrapolatedSpline = self.Proposition3(m,n)
+        
         
     def RegularizedInverseVariance(self,fAlphaCoefficients,m,n):
         '''
@@ -43,7 +46,7 @@ class AssetBubble(object):
         fAlpha = Q * fAlphaCoefficients
         return fAlpha
     
-    def RegularizedSolution(self,f,alpha,m,n):
+    def RegularizedSolution(self,f):
         '''
         Input:
         f = inverse variance
@@ -55,10 +58,10 @@ class AssetBubble(object):
         Description:
         Solves c_alpha found in equation (11) in 'how to detect an asset bubble'
         '''
-        QArray = [[self.ReproducingKernalFunction(n,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
+        QArray = [[self.ReproducingKernalFunction(self.n,self.m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
         Q = matrix(QArray)
         identityMatrix = matrix.identity(Q.nrows())
-        QAlphaM = Q + alpha * identityMatrix
+        QAlphaM = Q + self.alpha * identityMatrix
         fVector = vector(f)
         cAlpha = QAlphaM.inverse() * fVector
         return cAlpha
@@ -143,7 +146,7 @@ class AssetBubble(object):
         extrapolatedDomain = [x for x in srange(maxPrice, maxPrice + priceRange,h_n)]
         extrapolatedRange = [constant/(x**(m+1)) for x in extrapolatedDomain]
         crossProduct = list()
-        for i in range(len(extrapolatedDomain)):
+        for i in range(len(extrapolatedDomain)):#check if usablegridpoints is the same size as the extrapolated domain
             crossProduct.append((extrapolatedDomain[i],extrapolatedRange[i]))
         return extrapolatedRange, spline(crossProduct)
     
