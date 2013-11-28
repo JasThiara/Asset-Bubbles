@@ -98,6 +98,7 @@ class AssetBubble(object):
         b = float(m+1)
         c = float(en+m+1)
         z = float(xSmall/xLarge)
+        #print a,b,c,z
         GaussValue = self.HyperGeometricFunction(a,b,c,z)
         return nSquared*coeficient2*BetaValue*GaussValue
     
@@ -124,7 +125,7 @@ class AssetBubble(object):
         fValues = [(fAlphaCoefficientSum * nSquared * betaValue) / x**(m+1) for x in xValues]
         return fValues
         
-    def Prosition3(self,m,n):
+    def Proposition3(self,m,n):
         '''
         input:
         m = mth derivative

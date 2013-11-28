@@ -5,6 +5,12 @@ Created on Nov 21, 2013
 '''
 from sage.all import *
 from AssetBubble import AssetBubble
+def frange(x, y, jump):
+    l = list()
+    while x < y:
+        l.append(x)
+        x += jump
+    return l
 class AssetBubbleDetection(object):
     '''
     This class performs asset bubble detection over a variety of asset bubble objects
@@ -32,6 +38,10 @@ class AssetBubbleDetection(object):
         return abs( interpolatedDerivative - extrapolatedDerivative )
         
     def DetermineAssetBubble(self):
+        '''
+        check if assetbubblemodel.m is greater than 1
+        '''
+        return (self.AssetBubbleModel.m > 1)
         
 
     def __init__(self,FZ):
@@ -49,10 +59,11 @@ class AssetBubbleDetection(object):
         self.assetBubbleList = list()
         self.mMax = 10
         self.nMax = 4
-        self.mList = range(1,self.mMax).extend(srange(0.5,1,.05))
+        mSet1 = set(range(1,self.mMax))
+        mSet2 = set(frange(0.5,1,.05))
+        self.mList = mSet1.union(mSet2)
         for m in self.mList:
-            for n in range(1,self.nMax):
-                self.assetBubbleList.append(AssetBubble(FZ,m,n))
+            self.assetBubbleList.append(AssetBubble(FZ,m,1))
         self.assetBubbleList = sorted(self.assetBubbleList,key=lambda AB: AssetBubbleDetection.SortingFunction(AB))
         self.AssetBubbleModel = self.assetBubbleList[0]
         self.interpolatedFunction = self.AssetBubbleModel.FlorenZmirou.CubicInterpolatedSigma     
