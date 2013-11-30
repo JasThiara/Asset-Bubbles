@@ -41,8 +41,8 @@ class Stock(object):
             exchange = 'NASD'
         currentTime = int(time.time())
         link = 'http://www.google.com/finance/getprices?q=%s&x=%s&i=%d&p=%dd&f=d,c,o,h,l&df=cpct&auto=1&ts=%d'%(Parameters[0].upper(),exchange,Parameters[2],Parameters[1],currentTime)
-# q = ticker, x = exchange, i = 60 seconds, p = days 
-#       link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
+        # q = ticker, x = exchange, i = 60 seconds, p = days 
+        # link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
         filePtr = urllib.urlopen(link)
         DataList = filePtr.readlines()
         tickerData = DataList[7:len(DataList)]

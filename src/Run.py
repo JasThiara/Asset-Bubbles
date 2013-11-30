@@ -27,7 +27,7 @@ if __name__ == '__main__':
     #1.3.3) Number of Points for each Grid Point
     #1.3.4) Plot cubic spline interpolation of sigma
     #1.4)Extrapolate sigma_b if necessary
-#    tickerData = Stock(filename="../old/scripts/csv/CLF_2013-04-29.csv")#part 0
+    #    tickerData = Stock(filename="../old/scripts/csv/CLF_2013-04-29.csv")#part 0
     Params = ['ba',1,60]
     tickerData = Stock(tickerParams=Params)#part 0
     tickerMax = tickerData.GetMaxStockPrice()#xmax

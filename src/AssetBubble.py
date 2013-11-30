@@ -4,8 +4,8 @@ Created on Oct 27, 2013
 @author: Jas
 '''
 from sage.all import *
-
-class AssetBubble(object):
+from ReproducingKernel import ReproducingKernels
+class AssetBubble(ReproducingKernels):
     '''
     Deciding whether and extrapolation is required
     '''
@@ -21,8 +21,9 @@ class AssetBubble(object):
                      Step2: If true Then Extrapolate
                      Step3: Determine if asset is bubble
         '''
-        self.n = n
-        self.m = m
+        super(ReproducingKernels,self).__init__(FlorenZmirouObject,n,m)
+        #        self.n = n
+        #        self.m = m
         self.alpha = float(1 + m) / 2.0
         self.FlorenZmirou = FlorenZmirouObject
         self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance)
