@@ -9,7 +9,7 @@ class ReproducingKernels(object):
     This build the Reproducing Kernels for when n=1 and n=2 referenced in "How to Detect an Asset Bubble" and found in
     "computing a family of reproducing kernels for statistical applications" by Christine Thomas-Agnan
     '''
-    
+    @staticmethod
     def KernelN1(self,x,y,tau):
         '''
         inputs:
@@ -27,6 +27,18 @@ class ReproducingKernels(object):
         return term1 * term2 * term3
     
     @staticmethod
+    def KernelN2(self,x,y,tau):
+        lesserValue = min([x,y])
+        greaterValue = max([x,y])
+        result = 0.0
+        L = ReproducingKernels.LMatrixAsFunctionalMatrix()
+        b = ReproducingKernels.bVector()
+        for i in range(0,4):
+            for k in range(0,4):
+                result += L[i,k](tau) * b[i](tau*lesserValue)*b[k](tau*greaterValue)
+        return result
+    
+    @staticmethod
     def b1(z):
         return exp(sqrt(2)*z / 2) * cos(sqrt(2)*z / 2)
     @staticmethod
@@ -38,6 +50,14 @@ class ReproducingKernels(object):
     @staticmethod
     def b4(z):
         return exp(-sqrt(2)*z / 2) * sin(sqrt(2)*z / 2)
+    @staticmethod
+    def bVector():
+        return [
+                lambda z: ReproducingKernels.b1(z),
+                lambda z: ReproducingKernels.b2(z),
+                lambda z: ReproducingKernels.b3(z),
+                lambda z: ReproducingKernels.b4(z)
+                ]
     @staticmethod
     def delta(tau):
         term1 = tau * sqrt(2)
@@ -94,9 +114,13 @@ class ReproducingKernels(object):
                             lambda tau: ReproducingKernels.L(tau,-1, 1,-1, 1,-1, 1, 0, 2) #l44
                             ]
                            ]
-    
-    def KernelN2(self,x,y,tau):
-        lesserValue
+    @staticmethod
+    def KernelVector():
+        return [
+                lambda x,y,tau: ReproducingKernels.KernelN1( x, y, tau),
+                lambda x,y,tau: ReproducingKernels.KernelN1( x, y, tau)
+                ]
+        
     def __init__(self,FZ,n,m):
         '''
         Constructor
@@ -112,6 +136,7 @@ class ReproducingKernels(object):
         self.b = FZ.Stock.maxPrice
         self.m = m
         self.n = n
+        self.M = len(FZ.UsableGridPoints)
         
         
         
