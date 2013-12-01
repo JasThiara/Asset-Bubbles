@@ -22,14 +22,15 @@ class RKHSExtrapolationOnRootSigma(RKHS):
         This performs the operations of section 5.2.3 on "how to detect an asset bubble"
         A) Non parametric estimator on sigma(x) where x is the fixed grid points -> FZ.EstimatedSigma
         B) Interpolate sigma(x) over D by 1 of 2 ways:
-        B.1) cubic spline
-        B.2) RKHS by lemma 10
-        C) decide on extrapolation
-        D) find m bar
+        B.1) cubic spline -> f^b
+        B.2) RKHS by lemma 10 -> f^b
+        C) 
+        D.1)  sigma^b = 1 / sqrt(f^b)  from (B.2 where n=2)
+        D.2)  sigma_m = 1 / sqrt(InterpolationOfInverseVariance.rkhsInterpolation)
+        D.3)  do lagrange multiplier for eqn (12) with D.1, D.2 
         Input
         FZ = florenZmirou
         '''
-        
         super(RKHS,self).__init__()
         #A) Non parametric estimator on sigma(x) where x is the fixed grid points -> FZ.EstimatedSigma
         #B) Interpolate sigma(x) over D by 1 of 2 ways:

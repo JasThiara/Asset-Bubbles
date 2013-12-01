@@ -24,6 +24,8 @@ class InterpolationOfInverseVariance(RKHS):
         for i in range(0,self.M):
             Q[i] = self.KernelProposition2(self.n, self.m, self.X[i],x)
         return Q * self.coefficients
+    def Sigma_m(self,x):
+        return (1/sqrt(self.rkhsInterpolation(x)))
     def __init__(self,FZ,n,m):
         '''
         Description:

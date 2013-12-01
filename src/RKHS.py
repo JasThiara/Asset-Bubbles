@@ -72,7 +72,11 @@ class RKHS(object):
     @staticmethod
     def IndefiniteEulerType(m,n,z):
         return integral((1-x)^(n-1) * x^m * (1-z*x)^(n-1),x)
-    
+    @staticmethod
+    def RKHSinnerProduct(f,g,n,m):
+        fn = f.derivative(n)
+        gn = g.derivative(n)
+        return integral((y^n * fn(y)/factorial(n))*(y^n * gn(y)/factorial(n))*(y^m),y,0,oo)
     @staticmethod
     def b1(z):
         return exp(sqrt(2)*z / 2) * cos(sqrt(2)*z / 2)
