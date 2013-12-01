@@ -20,10 +20,9 @@ class InterpolationOfInverseVariance(RKHS):
         D = self.alpha * matrix.identity(self.M,self.M)
         return (self.Q + D).inverse() * self.F
     def rkhsInterpolation(self,x):
-        Q = matrix.zero(self.M,self.M)
+        Q = vector(SR,self.M)
         for i in range(0,self.M):
-            for j in range(0,self.M):
-                Q[i,j] = self.KernelProposition2(self.n, self.m, self.X[i], x[j])
+            Q[i] = self.KernelProposition2(self.n, self.m, self.X[i],x)
         return Q * self.coefficients
     def __init__(self,FZ,n,m):
         '''

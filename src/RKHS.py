@@ -94,6 +94,10 @@ class RKHS(object):
                 lambda z: RKHS.b4(z)
                 ]
     @staticmethod
+    def B(z):
+        b = RKHS.bVector()
+        return vector([b[0](z),b[1](z),b[2](z),b[3](z)])
+    @staticmethod
     def delta(tau):
         term1 = tau * sqrt(2)
         term2 = sin(tau * sqrt(2)/2)*sin(tau * sqrt(2)/2)
@@ -153,7 +157,7 @@ class RKHS(object):
     def KernelVector():
         return [
                 lambda a,b,x,y,tau  : RKHS.KernelN1( a, b, x, y, tau),
-                lambda x,y,tau      : RKHS.KernelN1( x, y, tau),
+                lambda x,y,tau      : RKHS.KernelN2( x, y, tau),
                 lambda n,m,x,y      : RKHS.KernelProposition2( n, m, x, y)
                 ]
 
