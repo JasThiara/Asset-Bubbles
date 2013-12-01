@@ -4,8 +4,7 @@ Created on Oct 27, 2013
 @author: Jas
 '''
 from sage.all import *
-from ReproducingKernel import ReproducingKernels
-class AssetBubble(ReproducingKernels):
+class AssetBubble(object):
     '''
     Deciding whether and extrapolation is required
     '''
@@ -21,7 +20,6 @@ class AssetBubble(ReproducingKernels):
                      Step2: If true Then Extrapolate
                      Step3: Determine if asset is bubble
         '''
-        super(ReproducingKernels,self).__init__(FlorenZmirouObject,n,m)
         #        self.n = n
         #        self.m = m
         self.alpha = float(1 + m) / 2.0
