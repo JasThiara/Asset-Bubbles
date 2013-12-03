@@ -52,7 +52,9 @@ class RKHS(object):
                            ]
     RKHSN2(x,y,tau) = L(tau,-1, 1, 1, 1, 3,-1, 0,-2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1, 0, 2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1, 0, 4) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau, 1, 1,-1, 1, 1,-1, 0,-2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1,-sqrt(2)/4, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, sqrt(2)/4, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau, 1, 1, 1, 1,-3, 1, 0, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1,-sqrt(2)/4, 4) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1,-sqrt(2)/4, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))
     #RKHSM
-    
+    var('j')
+    BinomialSum(x,y,n) = sum(binomial(n,j) * x^(n-j) * y^j, j, 0, n)
+    RKHSM(n,m,x,y) = n*n * max(x,y)^(-m-1) * integrate(x^m * (1-x)^(n-1) * (1-(min(x,y)/max(x,y))*x)^(n-1),x,0,1)
     
 #    @staticmethod
 #    def KernelN1(a,b,x,y,tau):

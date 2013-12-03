@@ -1,0 +1,16 @@
+sage.numerical.optimize.minimize_constrained(func, cons, x0, gradient=None, algorithm='default', **args)
+Minimize a function with constraints.
+
+INPUT:
+
+func Ð Either a symbolic function, or a Python function whose argument is a tuple with n components
+cons Ð constraints. This should be either a function or list of functions that must be positive. Alternatively, the constraints can be specified as a list of intervals that define the region we are minimizing in. If the constraints are specified as functions, the functions should be functions of a tuple with n components (assuming n variables). If the constraints are specified as a list of intervals and there are no constraints for a given variable, that component can be (None, None).
+x0 Ð Initial point for finding minimum
+algorithm Ð Optional, specify the algorithm to use:
+'default' Ð default choices
+'l-bfgs-b' Ð only effective if you specify bound constraints. See [ZBN97].
+gradient Ð Optional gradient function. This will be computed automatically for symbolic functions. This is only used when the constraints are specified as a list of intervals.
+
+
+
+func = sqrt( integral( (sqrt((1/RKHSM(
