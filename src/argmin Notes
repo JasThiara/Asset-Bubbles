@@ -13,4 +13,30 @@ gradient Ğ Optional gradient function. This will be computed automatically for s
 
 
 
-func = sqrt( integral( (sqrt((1/RKHSM(
+func = sqrt( integral( sqrt((1/RKHSM(n,m,x,y)^2 - 1/RKHSN2(x,y,tau)^2)^2), x, max(S) - 1/3 * (max(S) - min(S)), max(S)) )
+variables = n,m,x,y,tau
+
+minimization function
+f(n,m,x,y,tau) = func
+
+subject to:
+partial f
+--------- (n,m,x,y,tau) >= 0
+partial n
+
+partial f
+--------- (n,m,x,y,tau) >= 0
+partial m
+
+partial f
+--------- (n,m,x,y,tau) >= 0
+partial x
+
+partial f
+--------- (n,m,x,y,tau) >= 0
+partial y
+
+partial f
+--------- (n,m,x,y,tau) >= 0
+partial tau
+
