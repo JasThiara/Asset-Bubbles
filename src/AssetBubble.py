@@ -6,6 +6,8 @@ Created on Oct 27, 2013
 from sage.all import *
 class AssetBubble(object):
     '''
+    look into the following link:
+    http://www.mathworks.com/matlabcentral/fileexchange/52-regtools/content/regu/tikhonov.m
     Deciding whether and extrapolation is required
     '''
 
