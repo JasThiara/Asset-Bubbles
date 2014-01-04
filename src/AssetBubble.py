@@ -10,13 +10,42 @@ class AssetBubble(object):
     http://www.mathworks.com/matlabcentral/fileexchange/52-regtools/content/regu/tikhonov.m
     Deciding whether and extrapolation is required
     '''
-
+    
+    def GeneralizedCrossValidation(self,m,n):
+        '''
+        Input:
+        n                     = "take the nth derivative of f"
+        m                     = (integer value) "take the mth derivative of f"
+        Output: 
+        alpha - the estimated value needed to solve the minimization of the tikhonov regularization procedure. The regularization parameter that imposes proper balance between the residual constraint ||Qf-F|| and the magnitude constraint ||f||
+        Description:
+        1) Assume lambda in (0,10]
+        2) G(lambda) = ||Qf - F||^2/trace(I - Q Ql)^2
+        where 
+        Ql = (Q.transpose() * Q + lambda^2 * I).inverse() * Q.transpose()
+        and 
+        f = sum(i=1,...,M) c_i^alpha Q
+        where c_i^alpha are the compenents of the vector of c:
+        c = (Q + lambda^2 * I).inverse() * F
+        3) Interpolate G(lambda)
+        4) find lambda that minimizes G(lambda)
+        5) alpha = lambda^2
+        '''
+        #step 1
+        l = [x for x in srange(0,10,.001) if x != 0]
+        #step 2
+        QArray = [[self.ReproducingKernalFunction(n,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
+        Q = matrix(QArray)
+        dataVector = vector(self.FlorenZmirou.InverseVariance)
+        c = [(Q + la^2 * matrix.identity(Q.nrows())).inverse() * dataVector for la in l]
+        
+        
     def __init__(self,FlorenZmirouObject,m,n):
         '''
         Input: 
         n                     = "take the nth derivative of f"
         FloremZmirouObject    = FlorenZmirou Class
-        alpha                 = regularization parameter that imposes proper balance between the residual constraint ||Qf-F|| and the magnitude constraint ||f||
+        
         m                     = (integer value) "take the mth derivative of f"
         Description: Step1: Determines if Extrapolation is needed
                      Step2: If true Then Extrapolate
@@ -24,8 +53,9 @@ class AssetBubble(object):
         '''
         #        self.n = n
         #        self.m = m
-        self.alpha = float(1 + m) / 2.0
+        #self.alpha = float(1 + m) / 2.0
         self.FlorenZmirou = FlorenZmirouObject
+        self.alpha = self.GeneralizedCrossValidation(m,n)
         self.fAlphaCoefficients = self.RegularizedSolution(self.FlorenZmirou.InverseVariance)
         self.fAlpha = self.RegularizedInverseVariance(self.fAlphaCoefficients,m,n)
         self.extrapolatedPlotDomain, self.fExtrapolationEstimate, self.fExtrapolatedSpline = self.Proposition3(m,n)
