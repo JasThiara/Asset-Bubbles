@@ -36,9 +36,26 @@ class AssetBubble(object):
         #step 2
         QArray = [[self.ReproducingKernalFunction(n,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
         Q = matrix(QArray)
-        dataVector = vector(self.FlorenZmirou.InverseVariance)
-        c = [(Q + la^2 * matrix.identity(Q.nrows())).inverse() * dataVector for la in l]
-        
+        Eye = matrix.identity(Q.nrows())
+        F = vector(self.FlorenZmirou.InverseVariance)# F
+        c = [(Q + la^2 * Eye).inverse() * F for la in l]
+        f = [Q * xsi for xsi in c]
+        Ql = [(Q.transpose() * Q + la^2 * Eye).inverse() * Q.transpose() for la in l]
+        G = list()
+        pointList = list()
+        for i in range(len(l)):
+            numerator = ((Q*f[i] - F).norm())^2 #||Qf - F||^2
+            denomenator = ((Eye - Q * Ql[i]).trace())^2 #trace(I - Q Ql)^2
+            g = numerator/denomenator
+            G.append(g)
+            pointList.append((l[i],g))
+        #Step 3
+        interpolatedG = spline(pointList)
+        #Step 4
+        lmin = find_root(interpolatedG.derivative,0,10)
+        #step 5
+        return lmin^2
+            
         
     def __init__(self,FlorenZmirouObject,m,n):
         '''

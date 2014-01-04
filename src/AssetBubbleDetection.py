@@ -52,7 +52,7 @@ class AssetBubbleDetection(object):
         Description:
         1) Builds the assetBubbleList [AB1, AB2,...., AB(mMax*nMax)] as in the description
         2) Needs to sort assetBubbleList by abs( ABi.FlorenZmirou.CubicInterpolatedSigma.derivative(ABi.FlorenZmirou.Stock.maxPrice) - (ABi.fExtrapolatedSpline.derivative(ABi.FlorenZmirou.Stock.maxPrice))
-        2.1) (2) is finding the best extrapolation function in assetBubbleList that has the closest derivate to the interpolated function
+        2.1) (2) is finding the best extrapolation function in assetBubbleList that has the closest derivative to the interpolated function
         3) Builds plot of interpolated function and the best extrapolated function
         4) determines the asset bubble
         '''
