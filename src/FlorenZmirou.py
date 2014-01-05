@@ -31,10 +31,11 @@ class FlorenZmirou(object):
         self.Stock = stock
         self.GridPoints = self.GetGridPoints()
         self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.Stock.StockPrices,self.GridPoints,self.n,self.h_n,.05)
-        self.EstimatedSigma = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.UsableGridPoints]# these are the sigma values evulated at the grid points
-        self.EstimatedVariance = [i*i for i in self.EstimatedSigma]
+        self.EstimatedVariance = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.UsableGridPoints]# these are the sigma values evulated at the grid points
+        self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedSigma]
         self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
-        self.CubicInterpolatedSigma = self.GetCubicInterpolatedSigma()
+        self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
+        self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
         self.InterpolatedRange = (self.Stock.minPrice,self.Stock.maxPrice)
 
     def GetCubicInterpolatedSigma(self):
@@ -46,7 +47,7 @@ class FlorenZmirou(object):
         Points = []
         for i in range(N):
             x = self.UsableGridPoints[i]
-            y = self.EstimatedSigma[i]
+            y = self.EstimatedVariance[i]
             Points.append((x,y))
         return spline(Points)
 

@@ -5,6 +5,11 @@ Created on Jan 4, 2014
 '''
 from sage.all import *
 ### RKHS N=1 and N=2
+def between(x,rangeValues):
+    rangeValues.sort()#smallest->0; largest->len-1
+    m = rangeValues[0]
+    M = rangeValues[len(rangeValues)-1]
+    return (x <= M and x >= m)
 def min(a,b):  
     return (a + b + ((a-b)**2)**(1/2))/2
 def max(a,b):
@@ -192,12 +197,20 @@ class Approximation(object):
     '''
     @staticmethod
     def RegularizedSolutionRKHSM(m,en, stockData, florenZmirouData):
+        '''
+        input:
+        m                = m
+        en               = n
+        stockData        = price data (grid points)
+        florenZmirouData = inverse variance from floren zmirou estimator
+        output: a function f:R+ to R that is the RKHS approximation of inverse variance
+        '''
         alpha = GCV_Q_RKHSM(m, en, stockData,florenZmirouData)
         Q = Q_RKHSM(en,m,stockData)
         Eye = matrix.identity(Q.nrows())
         qRegularized = Q + alpha * Eye
         c = qRegularized.inverse() * vector(florenZmirouData)
-        fAlpha = lambda x: c.dot_product(vector([RKHSM(en,m,x,y) for y in stockData]))
+        fAlpha = lambda x: c.dot_product(vector([RKHSM(en,m,x,y) for y in stockData])) if between(x,stockData) else en*en*beta(m+1,en)*sum(c)/x**(m+1)
         return fAlpha
     @staticmethod
     def RegularizedSolutionRKHSN1(a,b,tau, stockData, florenZmirouData):
@@ -210,12 +223,21 @@ class Approximation(object):
         return fAlpha
     @staticmethod
     def RegularizedSolutionRKHSN2(tau, stockData, florenZmirouData):
+        '''
+        input:
+        m                = m
+        en               = n
+        stockData        = price data (grid points)
+        florenZmirouData = inverse variance from floren zmirou estimator
+        output: a function f:R+ to R that is the RKHS approximation of inverse variance
+        '''
         alpha = GCV_Q_RKHSN2(tau, stockData, florenZmirouData)
+        m = 2 * alpha - 1
         Q = Q_RKHSN2(stockData,tau)
         Eye = matrix.identity(Q.nrows())
         qRegularized = Q + alpha * Eye
         c = qRegularized.inverse() * vector(florenZmirouData)
-        fAlpha = lambda x: c.dot_product(vector([RKHSN2(x,y,tau) for y in stockData]))
+        fAlpha = lambda x: c.dot_product(vector([RKHSN2(x,y,tau) for y in stockData])) if between(x,stockData) else 4*beta(m+1,2)*sum(c)/x**(m+1)
         return fAlpha
     def __init__(self):
         '''
