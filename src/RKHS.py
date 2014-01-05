@@ -4,26 +4,7 @@ Created on Nov 30, 2013
 @author: Jas
 '''
 from sage.all import *
-def min(a,b):  
-    return (a + b + ((a-b)**2)**(1/2))/2
-def max(a,b):
-    return (a + b + ((a-b)**2)**(1/2))/2
-def bb(a1,a2,b1,b2,z):
-    return a1 * exp(a2 * sqrt(2)*z / 2) * cos(sqrt(2)*z / 2) + b1 * exp(b2 * sqrt(2)*z / 2) * sin(sqrt(2)*z / 2)
-def delta(tau):
-    return tau * sqrt(2)/(16*(sin(tau * sqrt(2)/2)*sin(tau * sqrt(2)/2) - sinh(tau * sqrt(2)/2)*sinh(tau * sqrt(2)/2)))
-def L(tau,a1,b1,a2,b2,a3,b3,a4,a5):
-    return (delta(tau)  * (tau * sqrt(2) + a2 * sin(b2 * tau * sqrt(2) ) + a3 * exp(b3 * tau * sqrt(2) + a5) + a4))
-def RKHSN1(a,b,x,y,tau):
-    return (tau / sinh(tau * (b - a))) * (cosh(tau*(b - max(x,y)))) * (cosh(tau*(min(x,y)-a)))
-def RKHSN2(x,y,tau):
-    return L(tau,-1, 1, 1, 1, 3,-1, 0,-2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1, 0, 2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1, 0, 4) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau, 1, 1,-1, 1, 1,-1, 0,-2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1,-sqrt(2)/4, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, sqrt(2)/4, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau, 1, 1, 1, 1,-3, 1, 0, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1,-sqrt(2)/4, 4) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1,-sqrt(2)/4, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))
-#RKHSM
-def BinomialSum(x,y,n):
-    var('j')
-    return sum(binomial(n,j) * x^(n-j) * y^j, j, 0, n)
-def RKHSM(en,m,x,y):
-    return en*en * max(x,y)^(-m-1) * integrate(x^m * (1-x)**(en-1) * (1-(min(x,y)/max(x,y))*x)**(en-1),x,0,1)
+
 class RKHS(object):
     '''
     This builds the Reproducing Kernels for when n=1 and n=2 referenced in "How to Detect an Asset Bubble" and found in
@@ -32,12 +13,6 @@ class RKHS(object):
     the RKHS function defined in proposition 2 of "how to detect an asset by bubble"
     using the Euler Type (see: http://en.wikipedia.org/wiki/Hypergeometric_function#Euler_type )
     '''
-    #Sage Expressions for Computing  RKHSN2
-    
-    
-    
-    
-    #RKHSN1, N2
     
     @staticmethod
     def LMatrixAsFunctionalMatrix():
@@ -68,8 +43,20 @@ class RKHS(object):
                             lambda tau: RKHS.L(tau,-1, 1,-1, 1,-1, 1, 0, 2) #l44
                             ]
                            ]
-    
-    
+    @staticmethod
+    def KernelVector():
+        return [
+                lambda a,b,x,y,tau  : RKHS.KernelN1( a, b, x, y, tau),
+                lambda x,y,tau      : RKHS.KernelN2( x, y, tau),
+                lambda n,m,x,y      : RKHS.KernelProposition2( n, m, x, y)
+                ]
+
+
+    def __init__(self):
+        '''
+        Constructor
+        '''
+        pass
 #    @staticmethod
 #    def KernelN1(a,b,x,y,tau):
 #        '''
@@ -185,19 +172,3 @@ class RKHS(object):
 #            for j in range(0,4):
 #                LMatrix[i,j] = RKHS.LMatrixAsFunctionalMatrix()[i,j](tau)
 #        return LMatrix
-    
-    
-    @staticmethod
-    def KernelVector():
-        return [
-                lambda a,b,x,y,tau  : RKHS.KernelN1( a, b, x, y, tau),
-                lambda x,y,tau      : RKHS.KernelN2( x, y, tau),
-                lambda n,m,x,y      : RKHS.KernelProposition2( n, m, x, y)
-                ]
-
-
-    def __init__(self):
-        '''
-        Constructor
-        '''
-        pass
