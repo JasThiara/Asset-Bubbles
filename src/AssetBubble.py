@@ -32,29 +32,32 @@ class AssetBubble(object):
         5) alpha = lambda^2
         '''
         #step 1
-        l = [x for x in srange(0,10,.001) if x != 0]
+        #l = [x for x in srange(.0001,1,.0001) if x != 0]
+        l = [10**(-n) for n in range(11)]
+        l.extend(range(2,14,1))
         #step 2
         QArray = [[self.ReproducingKernalFunction(n,m,x,y) for x in self.FlorenZmirou.UsableGridPoints] for y in self.FlorenZmirou.UsableGridPoints]
         Q = matrix(QArray)
         Eye = matrix.identity(Q.nrows())
         F = vector(self.FlorenZmirou.InverseVariance)# F
-        c = [(Q + la^2 * Eye).inverse() * F for la in l]
+        c = [(Q + la**2 * Eye).inverse() * F for la in l]
         f = [Q * xsi for xsi in c]
-        Ql = [(Q.transpose() * Q + la^2 * Eye).inverse() * Q.transpose() for la in l]
+        Ql = [(Q.transpose() * Q + la**2 * Eye).inverse() * Q.transpose() for la in l]
         G = list()
         pointList = list()
         for i in range(len(l)):
-            numerator = ((Q*f[i] - F).norm())^2 #||Qf - F||^2
-            denomenator = ((Eye - Q * Ql[i]).trace())^2 #trace(I - Q Ql)^2
+            numerator = ((Q*f[i] - F).norm())**2 #||Qf - F||^2
+            denomenator = ((Eye - Q * Ql[i]).trace())**2 #trace(I - Q Ql)^2
             g = numerator/denomenator
             G.append(g)
             pointList.append((l[i],g))
         #Step 3
         interpolatedG = spline(pointList)
         #Step 4
-        lmin = find_root(interpolatedG.derivative,0,10)
+        lmin = find_root(interpolatedG.derivative,10**(-10),1)
+        alpha = lmin**2
         #step 5
-        return lmin^2
+        return alpha
             
         
     def __init__(self,FlorenZmirouObject,m,n):
@@ -68,8 +71,8 @@ class AssetBubble(object):
                      Step2: If true Then Extrapolate
                      Step3: Determine if asset is bubble
         '''
-        #        self.n = n
-        #        self.m = m
+        self.n = n
+        self.m = m
         #self.alpha = float(1 + m) / 2.0
         self.FlorenZmirou = FlorenZmirouObject
         self.alpha = self.GeneralizedCrossValidation(m,n)
@@ -114,22 +117,6 @@ class AssetBubble(object):
         cAlpha = QAlphaM.inverse() * fVector
         return cAlpha
     
-    def BetaFunction(self,m,n):
-        '''
-        Input: n,m = Number
-        Output: Beta function Value
-        Description: Returns the beta function
-        '''
-        return beta(m,n)
-    
-    def HyperGeometricFunction(self,a,b,c,z):
-        '''
-        Input: a,b,c,z
-        Output: Guass's hypergeometric function
-        Description: Returns Gauss's hypergeometric function 
-        '''
-        return maxima.hgfred([a,b],[c],z).n()
-    
     def ReproducingKernalFunction(self,en,m,x,y):
         '''
         Input: en,m = nth and mth derivatives
@@ -141,14 +128,9 @@ class AssetBubble(object):
         xSmall = min([x,y])# minimum value of grid points (x,y)
         nSquared = en*en
         coeficient2 = xLarge**(-m-1)
-        BetaValue = self.BetaFunction(m+1, en)
-        a = float(-en+1)
-        b = float(m+1)
-        c = float(en+m+1)
-        z = float(xSmall/xLarge)
-        #print a,b,c,z
-        GaussValue = self.HyperGeometricFunction(a,b,c,z)
-        return nSquared*coeficient2*BetaValue*GaussValue
+        var('z')
+        EulerType = integrate(z**m * (1-z)**(en-1) * (1- (xSmall/xLarge) * z),(z,0,1))
+        return nSquared*coeficient2*EulerType
     
     def ExtrapolatedfAlpha(self,fAlphaCoefficients,xMin,xMax,xStepSize,m,n):
         '''
@@ -184,7 +166,7 @@ class AssetBubble(object):
         2)    A spline based off of output (1), i.e. spline( (x,f_alpha(x)) for x in srange(maxPrice, maxPrice + priceRange,h_n))
         '''
         nSquare = n * n
-        betaValue = self.BetaFunction(m+1, n)
+        betaValue = beta(m+1, n)
         sumCoefficients = sum(self.fAlphaCoefficients)
         constant = nSquare * betaValue * sumCoefficients
         #if the interpolated range, [a,b], the extrapolated range is [b, b + (b-a)]:

@@ -4,23 +4,41 @@ Created on Nov 30, 2013
 @author: Jas
 '''
 from sage.all import *
+def min(a,b):  
+    return (a + b + ((a-b)**2)**(1/2))/2
+def max(a,b):
+    return (a + b + ((a-b)**2)**(1/2))/2
+def bb(a1,a2,b1,b2,z):
+    return a1 * exp(a2 * sqrt(2)*z / 2) * cos(sqrt(2)*z / 2) + b1 * exp(b2 * sqrt(2)*z / 2) * sin(sqrt(2)*z / 2)
+def delta(tau):
+    return tau * sqrt(2)/(16*(sin(tau * sqrt(2)/2)*sin(tau * sqrt(2)/2) - sinh(tau * sqrt(2)/2)*sinh(tau * sqrt(2)/2)))
+def L(tau,a1,b1,a2,b2,a3,b3,a4,a5):
+    return (delta(tau)  * (tau * sqrt(2) + a2 * sin(b2 * tau * sqrt(2) ) + a3 * exp(b3 * tau * sqrt(2) + a5) + a4))
+def RKHSN1(a,b,x,y,tau):
+    return (tau / sinh(tau * (b - a))) * (cosh(tau*(b - max(x,y)))) * (cosh(tau*(min(x,y)-a)))
+def RKHSN2(x,y,tau):
+    return L(tau,-1, 1, 1, 1, 3,-1, 0,-2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1, 0, 2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1, 0, 4) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau, 1, 1,-1, 1, 1,-1, 0,-2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1,-sqrt(2)/4, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, sqrt(2)/4, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau, 1, 1, 1, 1,-3, 1, 0, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1,-sqrt(2)/4, 4) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1,-sqrt(2)/4, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))
+#RKHSM
+def BinomialSum(x,y,n):
+    var('j')
+    return sum(binomial(n,j) * x^(n-j) * y^j, j, 0, n)
+def RKHSM(en,m,x,y):
+    return en*en * max(x,y)^(-m-1) * integrate(x^m * (1-x)**(en-1) * (1-(min(x,y)/max(x,y))*x)**(en-1),x,0,1)
 class RKHS(object):
     '''
-    This build the Reproducing Kernels for when n=1 and n=2 referenced in "How to Detect an Asset Bubble" and found in
+    This builds the Reproducing Kernels for when n=1 and n=2 referenced in "How to Detect an Asset Bubble" and found in
     "computing a family of reproducing kernels for statistical applications" by Christine Thomas-Agnan
     -AND-
     the RKHS function defined in proposition 2 of "how to detect an asset by bubble"
     using the Euler Type (see: http://en.wikipedia.org/wiki/Hypergeometric_function#Euler_type )
     '''
     #Sage Expressions for Computing  RKHSN2
-    max(a,b) = (a + b + ((a-b)^2)^(1/2))/2
-    min(a,b) = (a + b + ((a-b)^2)^(1/2))/2
-    bb(a1,a2,b1,b2,z) = a1 * exp(a2 * sqrt(2)*z / 2) * cos(sqrt(2)*z / 2) + b1 * exp(b2 * sqrt(2)*z / 2) * sin(sqrt(2)*z / 2)
-    delta(tau) = tau * sqrt(2)/(16*(sin(tau * sqrt(2)/2)*sin(tau * sqrt(2)/2) - sinh(tau * sqrt(2)/2)*sinh(tau * sqrt(2)/2)))
-    L(tau,a1,b1,a2,b2,a3,b3,a4,a5) = (delta(tau)  * (tau * sqrt(2) + a2 * sin(b2 * tau * sqrt(2) ) + a3 * exp(b3 * tau * sqrt(2) + a5) + a4))
+    
+    
+    
     
     #RKHSN1, N2
-    RKHSN1(a,b,x,y,tau) = (tau / sinh(tau * (b - a))) * (cosh(tau*(b - max(x,y)))) * (cosh(tau*(min(x,y)-a)))
+    
     @staticmethod
     def LMatrixAsFunctionalMatrix():
         c = sqrt(2)/4
@@ -50,11 +68,7 @@ class RKHS(object):
                             lambda tau: RKHS.L(tau,-1, 1,-1, 1,-1, 1, 0, 2) #l44
                             ]
                            ]
-    RKHSN2(x,y,tau) = L(tau,-1, 1, 1, 1, 3,-1, 0,-2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1, 0, 2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1, 0, 4) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau, 1, 1,-1, 1, 1,-1, 0,-2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1,-sqrt(2)/4, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, sqrt(2)/4, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau, 1, 1, 1, 1,-3, 1, 0, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1,-sqrt(2)/4, 4) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1,-sqrt(2)/4, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))
-    #RKHSM
-    var('j')
-    BinomialSum(x,y,n) = sum(binomial(n,j) * x^(n-j) * y^j, j, 0, n)
-    RKHSM(n,m,x,y) = n*n * max(x,y)^(-m-1) * integrate(x^m * (1-x)^(n-1) * (1-(min(x,y)/max(x,y))*x)^(n-1),x,0,1)
+    
     
 #    @staticmethod
 #    def KernelN1(a,b,x,y,tau):
@@ -67,8 +81,8 @@ class RKHS(object):
 #        description:
 #        This method is for when n = 1
 #        '''
-#        lesserValue = min([x,y])
-#        greaterValue = max([x,y])
+#        lesserValue = min(x,y)
+#        greaterValue = max(x,y)
 #        term1 = tau / sinh(tau * (b - a))
 #        term2 = cosh(tau*(b - greaterValue))
 #        term3 = cosh(tau*(lesserValue-a))
@@ -85,8 +99,8 @@ class RKHS(object):
 #        description:
 #        This method is for when n = 1
 #        '''
-#        lesserValue = min([x,y])
-#        greaterValue = max([x,y])
+#        lesserValue = min(x,y)
+#        greaterValue = max(x,y)
 #        result = 0.0
 #        L = RKHS.LMatrixAsFunctionalMatrix()
 #        b = RKHS.bVector()
@@ -102,8 +116,8 @@ class RKHS(object):
 #        The goal of this is to interpolate 1/sigma^2(x)
 #        '''
 #        term1 = n^2
-#        term2 = max([x,y])^(-m-1)
-#        term3 = RKHS.EulerType(m, n, min([x,y])/max([x,y]))
+#        term2 = max(x,y)^(-m-1)
+#        term3 = RKHS.EulerType(m, n, min(x,y)/max(x,y))
 #        return term1 * term2 * term3
 #    @staticmethod
 #    def EulerType(m,n,z):
