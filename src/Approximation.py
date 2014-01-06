@@ -4,16 +4,19 @@ Created on Jan 4, 2014
 @author: Jas
 '''
 from sage.all import *
+from operator import itemgetter
 ### RKHS N=1 and N=2
+from scipy import optimize
+from numpy as np
 def between(x,rangeValues):
     rangeValues.sort()#smallest->0; largest->len-1
     m = rangeValues[0]
     M = rangeValues[len(rangeValues)-1]
     return (x <= M and x >= m)
-def min(a,b):  
-    return (a + b + ((a-b)**2)**(1/2))/2
-def max(a,b):
-    return (a + b + ((a-b)**2)**(1/2))/2
+#def min(a,b):  
+#    return (a + b + ((a-b)**2)**(1/2))/2
+#def max(a,b):
+#    return (a + b + ((a-b)**2)**(1/2))/2
 def bb(a1,a2,b1,b2,z):
     return a1 * exp(a2 * sqrt(2)*z / 2) * cos(sqrt(2)*z / 2) + b1 * exp(b2 * sqrt(2)*z / 2) * sin(sqrt(2)*z / 2)
 def delta(tau):
@@ -21,15 +24,15 @@ def delta(tau):
 def L(tau,a1,b1,a2,b2,a3,b3,a4,a5):
     return (delta(tau)  * (tau * sqrt(2) + a2 * sin(b2 * tau * sqrt(2) ) + a3 * exp(b3 * tau * sqrt(2) + a5) + a4))
 def RKHSN1(a,b,x,y,tau):
-    return (tau / sinh(tau * (b - a))) * (cosh(tau*(b - max(x,y)))) * (cosh(tau*(min(x,y)-a)))
+    return (tau / sinh(tau * (b - a))) * (cosh(tau*(b - max([x,y])))) * (cosh(tau*(min([x,y])-a)))
 def RKHSN2(x,y,tau):
-    return L(tau,-1, 1, 1, 1, 3,-1, 0,-2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1, 0, 2) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1, 0, 4) * bb(1 ,1 ,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau, 1, 1,-1, 1, 1,-1, 0,-2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,1 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-1, 1, 3, 1,-1, 1,-sqrt(2)/4, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, sqrt(2)/4, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau, 1, 1, 1, 1,-3, 1, 0, 2) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(1 ,-1,0 ,0 ,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))+L(tau,-3, 1,-1, 1,-1, 1,-sqrt(2)/4, 4) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,1 ,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1,-sqrt(2)/4, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,1 ,tau*max(x,y))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(1 ,-1,0 ,0 ,tau*max(x,y))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,-1,tau*min(x,y))*bb(0 ,0 ,1 ,-1,tau*max(x,y))
+    return L(tau,-1, 1, 1, 1, 3,-1, 0,-2) * bb(1 ,1 ,0 ,0 ,tau*min([x,y]))*bb(1 ,1 ,0 ,0 ,tau*max([x,y]))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(1 ,1 ,0 ,0 ,tau*min([x,y]))*bb(0 ,0 ,1 ,1 ,tau*max([x,y]))+L(tau,-1, 1, 3, 1,-1, 1, 0, 2) * bb(1 ,1 ,0 ,0 ,tau*min([x,y]))*bb(1 ,-1,0 ,0 ,tau*max([x,y]))+L(tau,-3, 1,-1, 1,-1, 1, 0, 4) * bb(1 ,1 ,0 ,0 ,tau*min([x,y]))*bb(0 ,0 ,1 ,-1,tau*max([x,y]))+L(tau,-1, 1,-1, 1, 1,-1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min([x,y]))*bb(1 ,1 ,0 ,0 ,tau*max([x,y]))+L(tau, 1, 1,-1, 1, 1,-1, 0,-2) * bb(0 ,0 ,1 ,1 ,tau*min([x,y]))*bb(0 ,0 ,1 ,1 ,tau*max([x,y]))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,1 ,tau*min([x,y]))*bb(1 ,-1,0 ,0 ,tau*max([x,y]))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,1 ,tau*min([x,y]))*bb(0 ,0 ,1 ,-1,tau*max([x,y]))+L(tau,-1, 1, 3, 1,-1, 1,-sqrt(2)/4, 2) * bb(1 ,-1,0 ,0 ,tau*min([x,y]))*bb(1 ,1 ,0 ,0 ,tau*max([x,y]))+L(tau,-1, 1, 1, 1, 1, 1, sqrt(2)/4, 0) * bb(1 ,-1,0 ,0 ,tau*min([x,y]))*bb(0 ,0 ,1 ,1 ,tau*max([x,y]))+L(tau, 1, 1, 1, 1,-3, 1, 0, 2) * bb(1 ,-1,0 ,0 ,tau*min([x,y]))*bb(1 ,-1,0 ,0 ,tau*max([x,y]))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(1 ,-1,0 ,0 ,tau*min([x,y]))*bb(0 ,0 ,1 ,-1,tau*max([x,y]))+L(tau,-3, 1,-1, 1,-1, 1,-sqrt(2)/4, 4) * bb(0 ,0 ,1 ,-1,tau*min([x,y]))*bb(1 ,1 ,0 ,0 ,tau*max([x,y]))+L(tau,-1, 1,-1, 1,-1, 1,-sqrt(2)/4, 2) * bb(0 ,0 ,1 ,-1,tau*min([x,y]))*bb(0 ,0 ,1 ,1 ,tau*max([x,y]))+L(tau,-1, 1, 1, 1, 1, 1, 0, 0) * bb(0 ,0 ,1 ,-1,tau*min([x,y]))*bb(1 ,-1,0 ,0 ,tau*max([x,y]))+L(tau,-1, 1,-1, 1,-1, 1, 0, 2) * bb(0 ,0 ,1 ,-1,tau*min([x,y]))*bb(0 ,0 ,1 ,-1,tau*max([x,y]))
 #RKHSM
 def BinomialSum(x,y,n):
     var('j')
     return sum(binomial(n,j) * x^(n-j) * y^j, j, 0, n)
 def RKHSM(en,m,x,y):
-    return en*en * max(x,y)^(-m-1) * integrate(x^m * (1-x)**(en-1) * (1-(min(x,y)/max(x,y))*x)**(en-1),x,0,1)
+    return en*en * max([x,y])^(-m-1) * integrate(x^m * (1-x)**(en-1) * (1-(min([x,y])/max([x,y]))*x)**(en-1),x,0,1)
 #Q matrices by RKHS
 def Q_RKHSM(en,m,data):
     Qarray = [[RKHSM(en,m,x,y) for x in data] for y in data]
@@ -224,6 +227,7 @@ class Approximation(object):
     @staticmethod
     def RegularizedSolutionRKHSN2(tau, stockData, florenZmirouData):
         '''
+        REVISE THIS METHOD
         input:
         m                = m
         en               = n
@@ -232,13 +236,83 @@ class Approximation(object):
         output: a function f:R+ to R that is the RKHS approximation of inverse variance
         '''
         alpha = GCV_Q_RKHSN2(tau, stockData, florenZmirouData)
-        m = 2 * alpha - 1
+        m = 2 * alpha - 1#This line needs revision
         Q = Q_RKHSN2(stockData,tau)
         Eye = matrix.identity(Q.nrows())
         qRegularized = Q + alpha * Eye
         c = qRegularized.inverse() * vector(florenZmirouData)
         fAlpha = lambda x: c.dot_product(vector([RKHSN2(x,y,tau) for y in stockData])) if between(x,stockData) else 4*beta(m+1,2)*sum(c)/x**(m+1)
         return fAlpha
+    
+    @staticmethod
+    def TauCurveFittingN1(cubicSpline,domain,FZ):
+        '''
+        input:
+        1)cubicSpline = a sage cubic spline
+        2)domain = [S_min, S_max]
+        3)FZ = floren Zmirou data
+        output:
+        1) K_(1,tau) with the best curve fit
+        2) tau 
+        Description:
+        1) given a cubic spline, c(x)
+        2) for tau = 1,...,9
+        2.1) Delta_tau = | K_(1,tau)(x) - c(x)|
+        2.2) integrate Delta_tau
+        2.3) Select  K_(1,tau)(x)  with the smallest Delta_tau
+        '''
+        a = domain[0]
+        b = domain[1]
+        stockData = FZ.Stock.StockPrices
+        florenZmirouData = FZ.EstimatedVariance
+        rkhsFunctions = [Approximation.RegularizedSolutionRKHSN1(a,b,tau, stockData, florenZmirouData) for tau in range(1,10)]
+        deltaTau = list()
+        var('z')
+        cubicSplineAreaUnderCurve = cubicSpline.definite_integral(a,b)
+        for tau in range(1,10):
+            deltaTau.append(integrate(  ((rkhsFunctions[tau-1](z) )**2)**(1/2), (z,a,b)  )- cubicSplineAreaUnderCurve)
+        indexOfBestCurveFit = min(enumerate(deltaTau), key=itemgetter(1))[0] #http://stackoverflow.com/questions/13300962/python-find-index-of-minimum-item-in-list-of-floats
+        tau = indexOfBestCurveFit + 1
+        return Approximation.RegularizedSolutionRKHSN1(a,b,tau, stockData, florenZmirouData), tau
+    @staticmethod
+    def AnnealingFunction(m0,*params):
+        m = m0[0]
+        sigma_bSquared, a, b, en,stockData,florenZmirouData = params
+        sigma_m = Approximation.RegularizedSolutionRKHSM(m,en, stockData, florenZmirouData))
+        var('z')
+        m_bar1 = integrate(( sigma_bSquared(z)  - sigma_m(z) )**2,(z,a,b)) 
+        m_bar2 = sqrt(m_bar1)
+        return m_bar2
+    @staticmethod
+    def TauCurveFittingN2(RKHSN1,stockData, florenZmirouData):
+        '''
+        find tau for RKHSN2 such that 
+        objective: minimize (RKHSN1-RKHSN2)'
+        '''
+        taus = range(1,10)
+        RKHSN2 = [RegularizedSolutionRKHSN2(tau, stockData, florenZmirouData) for tau in taus]
+        s = min(stockData)
+        S = max(stockData)
+        R = S-s
+        h = R/100.0
+        m = (RKHSN1(S) - RKHSN1(S-h))/h
+        muse = [  RKHSN2[i](S+h) - RKHSN2[i](S))/h for i in range(len(RKHSN2))   ]
+        indexOfBestCurveFit = min(enumerate([(muse[i] - m) for i in range(len(RKHSN2))]), key=itemgetter(1))[0] #http://stackoverflow.com/questions/13300962/python-find-index-of-minimum-item-in-list-of-floats
+        tau = indexOfBestCurveFit + 1   
+        return tau
+    @staticmethod
+    def ArgMinM(RKHSN1, stockData, florenZmirouData):
+        en = 2
+        tau = Approximation.TauCurveFittingN2(RKHSN1, stockData, florenZmirouData)
+        f_b = Approximation.RegularizedSolutionRKHSN2(tau, stockData, florenZmirouData)#appoximates 1/sigma^2
+        sigma_bSquared = 1/f_b
+        s = min(stockData)
+        b = max(stockData)
+        a = b - (1/3) * (b - s)
+        params = (sigma_bSquared, a, b, en,stockData,florenZmirouData)
+        m0 = np.array([5])
+        m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule=boltzmann, full_output=True, full_output=True, maxiter=500, lower=1,upper=10, dwell=10, disp=False)
+        return (m_bar, argminVal,T,feval,iters,accept,status)
     def __init__(self):
         '''
         Constructor
@@ -249,4 +323,4 @@ class Approximation(object):
         3) over RKHM using proposition 3 ->f_m
         4) over RKHSN2 -> f_b
         '''
-        
+        pass
