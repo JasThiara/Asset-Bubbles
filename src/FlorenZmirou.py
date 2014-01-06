@@ -31,14 +31,15 @@ class FlorenZmirou(object):
         self.Stock = stock
         self.GridPoints = self.GetGridPoints()
         self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.Stock.StockPrices,self.GridPoints,self.n,self.h_n,.05)
-        self.EstimatedVariance = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.UsableGridPoints]# these are the sigma values evulated at the grid points
-        self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedSigma]
+        self.EstimatedVariance = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.Stock.StockPrices]# these are the sigma values evulated at the grid points
+        self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
         self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
         self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
         self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
         self.InterpolatedRange = (self.Stock.minPrice,self.Stock.maxPrice)
+        self.CreateZmirouTable()
 
-    def GetCubicInterpolatedSigma(self):
+    def GetCubicInterpolatedVariance(self):
         '''
         Description: It will give us cubic spline interpolation of sigma of grid points.
         Output: Given a list of grid points and estimated sigma, spline(Points) is an object such that spline(Points) is the value of the spline interpolation through the points in grid points and estimated sigma
@@ -259,7 +260,7 @@ class FlorenZmirou(object):
         columnNames = ["Usable Grid Points", "Estimated Sigma Zmirou", "Number of Points"]
         table.append(columnNames)
         gridPoints = self.UsableGridPoints
-        estimatedSigma = self.EstimatedSigma
+        estimatedSigma = self.EstimatedVariance
         for i in range(len(gridPoints)):
             table.append([str(gridPoints[i]), str(estimatedSigma[i]), str(len(self.StockPricesByGridPointDictionary[gridPoints[i]]))])
         out = sys.stdout

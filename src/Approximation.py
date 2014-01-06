@@ -7,7 +7,7 @@ from sage.all import *
 from operator import itemgetter
 ### RKHS N=1 and N=2
 from scipy import optimize
-from numpy as np
+import numpy as np
 def between(x,rangeValues):
     rangeValues.sort()#smallest->0; largest->len-1
     m = rangeValues[0]
@@ -69,9 +69,9 @@ def GCV_Q_RKHSM(m,en, stockData, florenZmirouData):
     '''
     #step 1
     #l = [x for x in srange(.0001,1,.0001) if x != 0]
-    l = [10**(-n) for n in range(11)]
+    l = [10**(-n) for n in range(7)]
     l.extend(range(2,14,1))
-    lambdaMin = 10**-10
+    lambdaMin = 10**-6
     lambdaMax = 13
     #step 2
     Q = Q_RKHSM(en,m,stockData)
@@ -118,17 +118,26 @@ def GCV_Q_RKHSN1(a,b,tau, stockData, florenZmirouData):
     '''
     #step 1
     #l = [x for x in srange(.0001,1,.0001) if x != 0]
-    l = [10**(-n) for n in range(11)]
+    l = [10**(-n) for n in range(7)]
     l.extend(range(2,14,1))
-    lambdaMin = 10**-10
+    lambdaMin = 10**-6
     lambdaMax = 13
     #step 2
     Q = Q_RKHSN1(stockData,a,b,tau)
     Eye = matrix.identity(Q.nrows())
     F = vector(florenZmirouData)# F
-    c = [(Q + la**2 * Eye).inverse() * F for la in l]
+    c = list()
+    for la in l:
+        #print "l value RKHSN1: %.11f \n"%la
+        c.append((Q + la**2 * Eye).inverse() * F)
+#    c = [(Q + la**2 * Eye).inverse() * F for la in l]
     f = [Q * xsi for xsi in c]
-    Ql = [(Q.transpose() * Q + la**2 * Eye).inverse() * Q.transpose() for la in l]
+    Ql = list()
+    for la in l:
+        #print "l value RKHSN1: %.11f \n"%la
+        A = (Q.transpose() * Q + la**2 * Eye).inverse() 
+        Ql.append(A * Q.transpose())
+#    Ql = [(Q.transpose() * Q + la**2 * Eye).inverse() * Q.transpose() for la in l]
     G = list()
     pointList = list()
     for i in range(len(l)):
@@ -167,9 +176,9 @@ def GCV_Q_RKHSN2(tau, stockData, florenZmirouData):
     '''
     #step 1
     #l = [x for x in srange(.0001,1,.0001) if x != 0]
-    l = [10**(-n) for n in range(11)]
+    l = [10**(-n) for n in range(7)]
     l.extend(range(2,14,1))
-    lambdaMin = 10**-10
+    lambdaMin = 10**-6
     lambdaMax = 13
     #step 2
     Q = Q_RKHSN2(stockData,tau)
@@ -278,25 +287,25 @@ class Approximation(object):
     def AnnealingFunction(m0,*params):
         m = m0[0]
         sigma_bSquared, a, b, en,stockData,florenZmirouData = params
-        sigma_m = Approximation.RegularizedSolutionRKHSM(m,en, stockData, florenZmirouData))
+        sigma_m = Approximation.RegularizedSolutionRKHSM(m,en, stockData, florenZmirouData)
         var('z')
         m_bar1 = integrate(( sigma_bSquared(z)  - sigma_m(z) )**2,(z,a,b)) 
         m_bar2 = sqrt(m_bar1)
         return m_bar2
     @staticmethod
-    def TauCurveFittingN2(RKHSN1,stockData, florenZmirouData):
+    def TauCurveFittingN2(RKHSN1, stockData, florenZmirouData):
         '''
         find tau for RKHSN2 such that 
         objective: minimize (RKHSN1-RKHSN2)'
         '''
         taus = range(1,10)
-        RKHSN2 = [RegularizedSolutionRKHSN2(tau, stockData, florenZmirouData) for tau in taus]
+        RKHSN2 = [Approximation.RegularizedSolutionRKHSN2(tau, stockData, florenZmirouData) for tau in taus]
         s = min(stockData)
         S = max(stockData)
         R = S-s
         h = R/100.0
         m = (RKHSN1(S) - RKHSN1(S-h))/h
-        muse = [  RKHSN2[i](S+h) - RKHSN2[i](S))/h for i in range(len(RKHSN2))   ]
+        muse = [  (RKHSN2[i](S+h) - RKHSN2[i](S))/h for i in range(len(RKHSN2))   ]
         indexOfBestCurveFit = min(enumerate([(muse[i] - m) for i in range(len(RKHSN2))]), key=itemgetter(1))[0] #http://stackoverflow.com/questions/13300962/python-find-index-of-minimum-item-in-list-of-floats
         tau = indexOfBestCurveFit + 1   
         return tau
@@ -311,8 +320,8 @@ class Approximation(object):
         a = b - (1/3) * (b - s)
         params = (sigma_bSquared, a, b, en,stockData,florenZmirouData)
         m0 = np.array([5])
-        m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule=boltzmann, full_output=True, full_output=True, maxiter=500, lower=1,upper=10, dwell=10, disp=False)
-        return (m_bar, argminVal,T,feval,iters,accept,status)
+        m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule='fast', full_output=True, maxiter=500, lower=.001,upper=10, dwell=10, disp=False)
+        return (m_bar, argminVal,T,feval,iters,accept,status,f_b)
     def __init__(self):
         '''
         Constructor
