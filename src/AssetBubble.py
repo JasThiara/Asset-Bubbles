@@ -7,20 +7,44 @@ from sage.all import *
 from Approximation import Approximation as Approx
 class AssetBubble(object):
     def __init__(self,FZ):
-        self.FZ = FZ
-        cubicSpline = FZ.CubicInterpolatedVariance
-        domain = [FZ.Stock.minPrice,FZ.Stock.maxPrice]
-        stockData = FZ.Stock.StockPrices
-        florenZmirouData = FZ.InverseVariance
-        self.RKHSN1, self.tauN1 = Approx.TauCurveFittingN1(cubicSpline, domain, FZ)
-        self.m_bar, self.argminVal,self.T,self.feval,self.iters,self.accept,self.status,self.RKHSN2 = Approx.ArgMinM(self.RKHSN1, stockData, florenZmirouData) 
-        self.RKHSM = Approx.RegularizedSolutionRKHSM(self.m_bar,2,stockData,florenZmirouData)
-        self.isBubble = self.m_bar>1#true/false
-    def PlotAssessment(self,ticker):
+        """
+        0) Divide the Stock sample into 30 subsamples, c1, c2,..., c30
+        1) Define Qi = Q(c1,c2,...,c(i-1),c(i+1),...,c30)  for i in 1,...,30
+        1.1) El, Ll = eigendecomposition(Ql) #El = eigenmatrix; Ll= eigenvalue diagonal
+        1.2) Glij.inverse() (lamda) = sum_{k=1}^n (Elik * Eljk)/(Llkk + lambda) for l = 1,2,....,30
+        1.3) evaluate 1.2 over various lambda values with the following:
+        1.3.1) find the min(LOOE)(lambda) where
+        1.3.1.1) LOOE = c/diag(Gl.inverse) #element-wise division, i.e. "first element of c divided by first element of diag(Gl.inverse), second element of c divided by second element of diag(Gl.inverse), etc"
+        1.3.1.2) c = Gl.inverse * F 
+        """
+        #New code
+        
+        #Old Code
+#        self.FZ = FZ
+#        cubicSpline = FZ.CubicInterpolatedVariance
+#        domain = [FZ.Stock.minPrice,FZ.Stock.maxPrice]
+#        stockData = FZ.Stock.StockPrices
+#        florenZmirouData = FZ.InverseVariance
+#        self.RKHSN1, self.tauN1 = Approx.TauCurveFittingN1(cubicSpline, domain, FZ)
+#        self.PlotAssessment(FZ)
+#        self.m_bar, self.argminVal,self.T,self.feval,self.iters,self.accept,self.status,self.RKHSN2 = Approx.ArgMinM(self.RKHSN1, stockData, florenZmirouData) 
+#        self.RKHSM = Approx.RegularizedSolutionRKHSM(self.m_bar,2,stockData,florenZmirouData)
+#        self.isBubble = self.m_bar>1#true/false
+        
+        
+    def PlotAssessment(self,FZ):
         '''
         plots the interpolations and extrapolations of the asset
+        1) plot RKHSN1, RKHSM, Cubic Spline on [Smin, Smax]
         '''
-        pass
+        tickerSymbol = FZ.Stock.Ticker
+        domain = [FZ.Stock.minPrice,FZ.Stock.maxPrice]
+        cubicSpline = FZ.CubicInterpolatedVariance
+        var('x')
+        plotRKHSN1 = plot(self.RKHSN1(x), (x,domain[0],domain[1]),legend_label='RKHSN1', color=(1,0,0) )
+        #plotCubicSpline = plot(cubicSpline(x), (x,domain[0],domain[1]),legend_label='cubic spline', color=(0,1,0) )
+        P = plotRKHSN1 #+ plotCubicSpline
+        P.save(tickerSymbol + '.png')
 #class AssetBubble(object):
 #    '''
 #    look into the following link:

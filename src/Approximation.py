@@ -7,7 +7,75 @@ from sage.all import *
 from operator import itemgetter
 ### RKHS N=1 and N=2
 from scipy import optimize
+import datetime
 import numpy as np
+
+"""
+        0) Divide the Stock sample into 30 subsamples, c1, c2,..., c30
+        1) Define Qi = Q(c1,c2,...,c(i-1),c(i+1),...,c30)  for i in 1,...,30
+        1.1) El, Ll = eigendecomposition(Ql) #El = eigenmatrix; Ll= eigenvalue diagonal
+        1.2) Glij.inverse() (lamda) = sum_{k=1}^n (Elik * Eljk)/(Llkk + lambda) for l = 1,2,....,30
+        1.3) evaluate 1.2 over various lambda values with the following:
+        1.3.1) find the min(LOOE)(lambda) where
+        1.3.1.1) LOOE = c/diag(Gl.inverse) #element-wise division, i.e. "first element of c divided by first element of diag(Gl.inverse), second element of c divided by second element of diag(Gl.inverse), etc"
+        1.3.1.2) c = Gl.inverse * F 
+"""
+def MakeThirtySamples(sample):
+    '''
+    This is step 0
+    input:
+    sample = list(x1,...,xn)
+    Output:
+    let g = sampleSize/30
+    list(
+        list(x1    , x2    ,...,xg    ), #first sample
+        list(x(g+1)  x(g+2),   ,x(2g) ), #second sample
+        ...,
+        list(x((n-1)g+1)  x((n-1)g+2),   ,xn ),#30th sample
+        )
+    '''
+    sampleSize = len(sample)
+    if sampleSize % 30 != 0:
+        sampleSize = sampleSize - (sampleSize % 30) 
+    return matrix(RR, 30, sample[0:sampleSize])
+
+def BuildLOOMRKHSN1(SubSamples, a,b,tau):
+    LOOMs = list()
+    cols = SubSamples.ncols()
+    subSampleSize = SubSamples.nrows() * SubSamples.ncols() - cols
+    for i in range(30):
+        rows = range(30)
+        rows.remove(i)
+        subSample = SubSamples[rows,0:cols].list()
+        b = max(subSample)
+        a = min(subSample)
+        M = matrix(RR,subSampleSize,subSampleSize, lambda i,j: RKHSN1(a,b,subSample[i],subSample[j],tau))
+        LOOMs.append(M)
+    return LOOMs
+def BuildLOOMRKHSN2(SubSamples, tau):
+    LOOMs = list()
+    cols = SubSamples.ncols()
+    subSampleSize = SubSamples.nrows() * SubSamples.ncols() - cols
+    for i in range(30):
+        rows = range(30)
+        rows.remove(i)
+        subSample = SubSamples[rows,0:cols].list()
+        M = matrix(RR,subSampleSize,subSampleSize, lambda i,j: RKHSN1(subSample[i],subSample[j],tau))
+        LOOMs.append(M)
+    return LOOMs
+def BuildLOOMRKHSM(SubSamples, en,m):
+    LOOMs = list()
+    cols = SubSamples.ncols()
+    subSampleSize = SubSamples.nrows() * SubSamples.ncols() - cols
+    for i in range(30):
+        rows = range(30)
+        rows.remove(i)
+        subSample = SubSamples[rows,0:cols].list()
+        b = max(subSample)
+        a = min(subSample)
+        M = matrix(RR,subSampleSize,subSampleSize, lambda i,j: RKHSN1(en,m,subSample[i],subSample[j]))
+        LOOMs.append(M)
+    return LOOMs
 def between(x,rangeValues):
     rangeValues.sort()#smallest->0; largest->len-1
     m = rangeValues[0]
@@ -220,17 +288,17 @@ class Approximation(object):
         alpha = GCV_Q_RKHSM(m, en, stockData,florenZmirouData)
         Q = Q_RKHSM(en,m,stockData)
         Eye = matrix.identity(Q.nrows())
-        qRegularized = Q + alpha * Eye
-        c = qRegularized.inverse() * vector(florenZmirouData)
+        qRegularized = Q.transpose() * Q + alpha * Eye
+        c = qRegularized.inverse() * Q.transpose() * vector(florenZmirouData)
         fAlpha = lambda x: c.dot_product(vector([RKHSM(en,m,x,y) for y in stockData])) if between(x,stockData) else en*en*beta(m+1,en)*sum(c)/x**(m+1)
         return fAlpha
     @staticmethod
     def RegularizedSolutionRKHSN1(a,b,tau, stockData, florenZmirouData):
-        alpha = GCV_Q_RKHSN1(a,b,tau, stockData, florenZmirouData)
+        alpha = GCV_Q_RKHSN1(a,b,tau, stockData, florenZmirouData) #replace with looms
         Q = Q_RKHSN1(stockData,a,b,tau)
         Eye = matrix.identity(Q.nrows())
-        qRegularized = Q + alpha * Eye
-        c = qRegularized.inverse() * vector(florenZmirouData)
+        qRegularized = Q.transpose() * Q + alpha * Eye
+        c = qRegularized.inverse() * Q.transpose() * vector(florenZmirouData)
         fAlpha = lambda x: c.dot_product(vector([RKHSN1(a,b,x,y,tau) for y in stockData]))
         return fAlpha
     @staticmethod
@@ -248,8 +316,8 @@ class Approximation(object):
         m = 2 * alpha - 1#This line needs revision
         Q = Q_RKHSN2(stockData,tau)
         Eye = matrix.identity(Q.nrows())
-        qRegularized = Q + alpha * Eye
-        c = qRegularized.inverse() * vector(florenZmirouData)
+        qRegularized = Q.transpose() * Q + alpha * Eye
+        c = qRegularized.inverse() * Q.transpose() * vector(florenZmirouData)
         fAlpha = lambda x: c.dot_product(vector([RKHSN2(x,y,tau) for y in stockData])) if between(x,stockData) else 4*beta(m+1,2)*sum(c)/x**(m+1)
         return fAlpha
     
@@ -320,7 +388,9 @@ class Approximation(object):
         a = b - (1/3) * (b - s)
         params = (sigma_bSquared, a, b, en,stockData,florenZmirouData)
         m0 = np.array([5])
-        m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule='fast', full_output=True, maxiter=500, lower=.001,upper=10, dwell=10, disp=False)
+        print datetime.datetime.now()
+        m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule='fast', full_output=True, maxiter=5, lower=.001,upper=10, dwell=10, disp=False)
+        print datetime.datetime.now()
         return (m_bar, argminVal,T,feval,iters,accept,status,f_b)
     def __init__(self):
         '''

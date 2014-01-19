@@ -74,6 +74,7 @@ class Stock(object):
             self.StockPrices=self.GetStockPrices(kwds['filename'])
         elif 'tickerParams' in kwds:
             self.StockPrices=self.GetGoogleData(kwds['tickerParams'])
+            self.Ticker = kwds['tickerParams'][0]
         else:
             raise Exception("bad paramaters")
         self.maxPrice = self.GetMaxStockPrice()

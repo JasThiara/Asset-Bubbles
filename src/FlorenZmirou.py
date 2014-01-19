@@ -6,7 +6,6 @@ Created on Oct 27, 2013
 from sage.all import *
 import locale
 import sys
-locale.setlocale(locale.LC_NUMERIC, "")
 class FlorenZmirou(object):
     '''
     FlorenZmirou will provide us list of sigma values and interpolation from list of stock prices
