@@ -6,7 +6,7 @@ Created on Oct 27, 2013
 import csv
 import urllib 
 import time
-class Stock(object):
+class Stock:
     '''
     Stock class will read a csv file provide a list of stock prices 
     '''

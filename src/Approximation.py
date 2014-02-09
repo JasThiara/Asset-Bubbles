@@ -325,7 +325,7 @@ class Approximation(object):
     def TauCurveFittingN1(cubicSpline,domain,FZ):
         '''
         input:
-        1)cubicSpline = a sage cubic spline
+        1)cubicSpline = natural cubic spline
         2)domain = [S_min, S_max]
         3)FZ = floren Zmirou data
         output:
@@ -334,7 +334,7 @@ class Approximation(object):
         Description:
         1) given a cubic spline, c(x)
         2) for tau = 1,...,9
-        2.1) Delta_tau = | K_(1,tau)(x) - c(x)|
+        2.1) Delta_tau = (( K_(1,tau)(x) - c(x))^10)^(1/10)
         2.2) integrate Delta_tau
         2.3) Select  K_(1,tau)(x)  with the smallest Delta_tau
         '''
@@ -345,9 +345,9 @@ class Approximation(object):
         rkhsFunctions = [Approximation.RegularizedSolutionRKHSN1(a,b,tau, stockData, florenZmirouData) for tau in range(1,10)]
         deltaTau = list()
         var('z')
-        cubicSplineAreaUnderCurve = cubicSpline.definite_integral(a,b)
+        #cubicSplineAreaUnderCurve = cubicSpline.definite_integral(a,b) <- NEEEDS REVISION
         for tau in range(1,10):
-            deltaTau.append(integrate(  ((rkhsFunctions[tau-1](z) )**2)**(1/2), (z,a,b)  )- cubicSplineAreaUnderCurve)
+            #deltaTau.append(integrate(  ((rkhsFunctions[tau-1](z) )**2)**(1/2), (z,a,b)  )- cubicSplineAreaUnderCurve) <- NEEDS REVISION
         indexOfBestCurveFit = min(enumerate(deltaTau), key=itemgetter(1))[0] #http://stackoverflow.com/questions/13300962/python-find-index-of-minimum-item-in-list-of-floats
         tau = indexOfBestCurveFit + 1
         return Approximation.RegularizedSolutionRKHSN1(a,b,tau, stockData, florenZmirouData), tau

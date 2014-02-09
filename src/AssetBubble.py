@@ -19,6 +19,7 @@ class AssetBubble(object):
         """
         #New code
         
+        
         #Old Code
 #        self.FZ = FZ
 #        cubicSpline = FZ.CubicInterpolatedVariance

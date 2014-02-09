@@ -4,9 +4,11 @@ Created on Oct 27, 2013
 @author: Jas
 '''
 from sage.all import *
+from Stock import Stock
+from Spline import NaturalCubicSpline
 import locale
 import sys
-class FlorenZmirou(object):
+class FlorenZmirou(Stock):
     '''
     FlorenZmirou will provide us list of sigma values and interpolation from list of stock prices
     '''
@@ -15,27 +17,42 @@ class FlorenZmirou(object):
         Description: It will make grid Points
         Output: Returns list of grid points
         '''
-        self.n = len(self.Stock.StockPrices)
-        self.h_n= self.Derive_hn(self.Stock.StockPrices)
+        self.n = len(self.StockPrices)
+        self.h_n= self.Derive_hn(self.StockPrices)
         self.T = 60*self.n # 60 sec times total number of data points because T is every minute from [0,T]
-        return self.Derive_x_values(self.Stock.StockPrices)
+        return self.Derive_x_values(self.StockPrices)
     
     
-    def __init__(self,stock):
+    def __init__(self,**kwds):
         '''
-        Input: Stock
-        Discription: Step1: From stock, it will give us sigma(x)
+        Input:
+        Keyword Usage:
+        if filename is used, it will read the yahoo API based minute to minute data:
+        
+        Stock(filename="Filename.csv")
+        
+        - or -
+        
+        if tickerParams is used, it will use the google API to retrieve minute to minute data
+        
+        Stock(tickerParams=['appl',10,60])
+        where 
+        1)the first element in the list is a string of the ticker symbol, e.g. 'appl'
+        2)the second element in the list is the historical data period, e.g. 10
+        3)the third element in the list is the period of data in seconds, e.g. 60 (seconds)
+        
+        Description: Step1: From stock, it will give us sigma(x)
                      Step2: Interpolate sigma(x) using step1.
         '''
-        self.Stock = stock
+        Stock.__init__(self,kwds)
         self.GridPoints = self.GetGridPoints()
-        self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.Stock.StockPrices,self.GridPoints,self.n,self.h_n,.05)
-        self.EstimatedVariance = [self.Volatility_estimation(self.T,self.Stock.StockPrices,ex,self.n,self.h_n) for ex in self.Stock.StockPrices]# these are the sigma values evulated at the grid points
+        self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
+        self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n) for ex in self.StockPrices]# these are the sigma values evulated at the grid points
         self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
         self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
         self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
         self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
-        self.InterpolatedRange = (self.Stock.minPrice,self.Stock.maxPrice)
+        self.InterpolatedRange = (self.minPrice,self.maxPrice)
         self.CreateZmirouTable()
 
     def GetCubicInterpolatedVariance(self):
@@ -49,7 +66,7 @@ class FlorenZmirou(object):
             x = self.UsableGridPoints[i]
             y = self.EstimatedVariance[i]
             Points.append((x,y))
-        return spline(Points)
+        return NaturalCubicSpline(Points)
 
     def Sublocal_Time(self,T,S,x,n,h_n):
         """
