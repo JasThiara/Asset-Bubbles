@@ -52,20 +52,26 @@ class FlorenZmirou(Stock):
         self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
         self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
         self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
+        self.GridVariance = self.GetGridVariance()
         self.InterpolatedRange = (self.minPrice,self.maxPrice)
         self.CreateZmirouTable()
-
+        
+    def GetGridVariance(self):
+        '''
+        Description:
+        Gets floren zmirou estimation over usable grid points
+        '''
+        Points = []
+        for x in self.UsableGridPoints:
+            y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n) 
+            Points.append((x,y))
+        return Points
     def GetCubicInterpolatedVariance(self):
         '''
         Description: It will give us cubic spline interpolation of sigma of grid points.
         Output: Given a list of grid points and estimated sigma, spline(Points) is an object such that spline(Points) is the value of the spline interpolation through the points in grid points and estimated sigma
         '''
-        N = len(self.UsableGridPoints)
-        Points = []
-        for i in range(N):
-            x = self.UsableGridPoints[i]
-            y = self.EstimatedVariance[i]
-            Points.append((x,y))
+        Points = self.GetGridVariance()
         return NaturalCubicSpline(Points)
 
     def Sublocal_Time(self,T,S,x,n,h_n):
