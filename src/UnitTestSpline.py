@@ -18,6 +18,11 @@ class Test(unittest.TestCase):
         combinedPlot = PolyPlot
         combinedPlot.save('testNaturalCubicSpline.png')
         self.assertEqual(1,1)     
+        
+    def testEvaluationOfCubicSpline(self):
+        data = [(0,1),(1,exp(1)), (2,exp(2)),(3,exp(3))]
+        S = NaturalCubicSpline(data)
+        
 
 
 if __name__ == "__main__":
