@@ -56,6 +56,16 @@ class FlorenZmirou(Stock):
         self.InterpolatedRange = (self.minPrice,self.maxPrice)
         self.CreateZmirouTable()
         
+    def GetGridInverseStandardDeviation(self):
+        '''
+        Description:
+        Gets floren zmirou estimation over usable grid points
+        '''
+        Points = []
+        for x in self.UsableGridPoints:
+            y = 1/sqrt(self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n) )
+            Points.append((x,y))
+        return Points
     def GetGridVariance(self):
         '''
         Description:

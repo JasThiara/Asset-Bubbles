@@ -54,15 +54,14 @@ class CrossValidation:
         '''
         self.a = FZ.minPrice
         self.b = FZ.maxPrice
-        self.gridPoints = FZ.GridPoints
+        self.gridPoints = FZ.GetGridInverseStandardDeviation()
         self.gridSize = len(self.gridPoints)
         self.taus = range(1,10)#1,2,...,9
         self.lambdas = srange(.1,10,.75)
-        kernelN1 = function("kernelN1", nargs=5, eval_func=RKHSN1)
-        self.QN1 = [(matrix(RR, self.gridPoints, self.gridPoints, lambda i,j: kernelN1(self.a,self.b,self.gridPoints[i],self.gridPoints[j],tau),tau) for tau in self.taus)]
-        self.Y = vector([P[1] for P in FZ.GridVariance])
+        self.QN1 = [(matrix(RR, self.gridPoints, self.gridPoints, lambda i,j: RKHSN1(self.a,self.b,self.gridPoints[i],self.gridPoints[j],tau),tau) for tau in self.taus)]
+        self.Y = vector([P[1] for P in self.gridPoints])
         self.looeListSorted= self.LOOEGenerator()
         self.L = self.looeListSorted[0][0]
         self.tau = self.looeListSorted[0][1][1]
-        self.RKHSN1 = self.looeListSorted[0][1][0]
+        self.ChosenRKHSN1 = self.looeListSorted[0][1][0]
         self.c = self.looeListSorted[0][3]
