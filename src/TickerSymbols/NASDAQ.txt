@@ -1,4 +1,3 @@
-Symbol	Description
 AAIT	AC Asia Information Tech MSCI Ishares
 AAL	American Airlines Group Inc.
 AALCP	American Airlines Group Inc.
