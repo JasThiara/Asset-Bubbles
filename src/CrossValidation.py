@@ -6,6 +6,18 @@ Created on Feb 9, 2014
 from scipy import optimize
 from sage.all import *
 
+def drange(L, A):
+    L.sort()
+    i = 0
+    iMax = len(L)
+    r = L[i]
+    isBelow = True
+    while r < A:
+        i += 1
+        r = L[i]
+    i -= 1
+    return [L[j] for j in range(i,iMax)]
+        
 def EigenInverse(Q,La, L,M):
     '''
     InputsL
@@ -63,11 +75,12 @@ class CrossValidationParams:
         self.taus = range(1,6)#1,2,...,9
         self.lambdas = srange(.1,12,.75)
         self.QN = self.GetQArray()#[(matrix(RR, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
+        self.X = vector([P[0] for P in self.gridPoints])
         self.Y = vector([P[1] for P in self.gridPoints])
         self.looeListSorted= self.LOOEGenerator()
         self.L = self.looeListSorted[0][0]
         self.tau = self.looeListSorted[0][1][1]
-        self.ChosenRKHSN2 = self.looeListSorted[0][1][0]
+        self.ChosenRKHS = self.looeListSorted[0][1][0]
         self.c = self.looeListSorted[0][3] #needs to evaluate this with RKHSN2(self.a,self.b,self.gridPoints[i],X,tau) for any X to become an estimator
         
 
@@ -77,7 +90,7 @@ class CrossValidationRKHSN2(CrossValidationParams):
     RKHSN2
     '''
     def GetQArray(self):
-        return [(matrix(RR, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
+        return [(matrix(RR, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.X[i],self.X[j],tau)),tau) for tau in self.taus]
     
     def __init__(self,FZ):
         '''
@@ -96,7 +109,7 @@ class CrossValidationRKHSN1(CrossValidationParams):
     RKHSN1
     '''
     def GetQArray(self):
-        return [(matrix(RR, self.gridSize, self.gridSize, lambda i,j: RKHSN1(self.a,self.b,self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
+        return [(matrix(RR, self.gridSize, self.gridSize, lambda i,j: RKHSN1(self.a,self.b,self.X[i],self.X[j],tau)),tau) for tau in self.taus]
     def __init__(self, FZ):
         '''
         Constructor
@@ -113,7 +126,7 @@ class CrossValidationRKHSM(CrossValidationParams):
     RKHSM.  However we're not sorting on min ||LOOE(RKHSM)||  we are sorting on Argmin sqrt(int(sigma_m - sigma^b))
     '''
     def GetQArray(self):
-        return [(matrix(RR, self.gridSize, self.gridSize, lambda i,j: RKHSM(2,m,self.gridPoints[i],self.gridPoints[j])),m) for m in self.ems]
+        return [(matrix(RR, self.gridSize, self.gridSize, lambda i,j: RKHSM(2,m,self.X[i],self.X[j])),m) for m in self.ems]
     def __init__(self,FZ):
         '''
         Constructor
@@ -126,12 +139,78 @@ class CrossValidationRKHSM(CrossValidationParams):
         CrossValidationParams.__init__(self, FZ, 1, 2, 1, 2, 1) #the last 5 entries are not important for RKHSM
         
 class ExtrapolationOptimizationTest(CrossValidationRKHSN2):
-    
-    def ArgMinGenerator(self,x,*params):
-        gridPoints = self.gridPoints
-        rkhsN2 = self.c.dot_product(vector([RKHSN2(x,y,self.tau) for y in gridPoints]))
+    def GetQArrayM(self):
+        return [(matrix(RR, self.gridSize, self.gridSize, lambda i,j: RKHSM(2,m,self.gridPoints[i],self.gridPoints[j])),m) for m in self.ems]
+    def LOOEGeneratorRKHSM(self): 
+        '''
+        description: creates the eigenvectors and diagonal matrix of eigenvalues for each matrix
+        '''
+        M = self.gridSize
+        identityMatrix = matrix.identity(M)
+        looeList = list()
+        for L in self.lambdas:
+            for Q in self.QM:
+                G = Q[0] + L * identityMatrix
+                diagonalEigenvalues, eigenvectorMatrix = G.eigenmatrix_right()
+                gInverse = EigenInverse(eigenvectorMatrix,diagonalEigenvalues,L,M)
+                c = gInverse * self.Y
+                D = gInverse.diagonal()
+                LOOE = vector([c[i]/D[i] for i in range(len(c))])
+                looeList.append((L,Q,LOOE.norm(),c,Q[1]))#Q[1] = m
+    def TrapezoidRule(self,f,a,b):
+        '''
+        domainPoints = the set of points in usableGridPoints in the range of [a,b] union (the previous grid point befor a)
         
+        '''
+        domainPoints = drange(self.gridPoints,a)
+        domainPoints.sort()
+        xDeltas = vector([(d[i+1] - d[i]) for i in range(len(domainPoints)-1)])
+        fDeltas = vector([(f(d[i+1]) - f(d[i])) for i in range(len(domainPoints)-1)])
+        return (1.0/2.0) * xDeltas.dot_product(fDeltas)
+    
     def __init__(self,FZ):
-        CrossValidationRKHSN2.__init__(self, FZ) 
-        #Fix Me m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule='fast', full_output=True, maxiter=5, lower=.001,upper=10, dwell=10, disp=False)
+        '''
+        step 1:  Compute sigma_b
+        step 2:  Compute sigma_m's
+        step 3:  for each sigma_m:  
+                    compute/add to list (m, square_root(integral(|sigma_m - sigma_b|^2)))
+        step 4:  sort list in step 3 by smallest square_root(integral(|sigma_m - sigma_b|^2))
+        step 5:  return m of step 4.
+        '''
+        CrossValidationRKHSN2.__init__(self, FZ)#step 1
+        #Step 2 - Compute sigma_m's
+        self.ems = srange(.1,12,.1)
+        self.QM = self.GetQArrayM()
+        self.looeListM= self.LOOEGeneratorRKHSM()
+        #step 3.1
+        resultantList = list
+        aye = self.b - (1.0/3.0) * (self.b - self.a)
+        sigma_b = lambda x: 1/sqrt(self.c.dot_product(vector([RKHSN2(ex,x,self.tau) for ex in self.X])))
+        for looeItem in self.looeListM:
+            '''
+            ----Does not need to be done in the for loop---- step 3.1
+            step    -3: resultantList = list()
+            step    -2: aye = self.b  - (1.0/3.0) * (self.b - self.a) 
+            Remark   1: self.c = c_b for f_b 
+            step     2: sigma_b(x) = 1/sqrt(self.c.dot_product(vector([RKHSN2(ex,x,self.tau) for ex in self.X])))
+            ----Does not need to be done in the for loop----
+            ----Needs to be done in the for loop---- step 3.2
+            step    -1: m = looeItem[4]
+            step     0: cM = looeItem[3]
+            step     3: sigma_m(x) = 1/sqrt(cM.dot_product(vector([RKHSM(2,m,ex,x) for ex in self.X])))
+            step     4: f(x) = abs(sigma_m(x) - sigma_b(x))^2
+            step     5: area <- Trapezoid Rule over aye to maxS on f(x)
+            step     6: add to resultantList (m,cM,area)
+            ----Needs to be done in the for loop----
+            ----Does not need to be done in the for loop---- step 3.3
+            step     7: sort resultantList by area
+            ----Does not need to be done in the for loop----
+            '''
+            m = looeItem[4]
+            cM = looeItem[3]
+            sigma_m = lambda x: 1/sqrt(cM.dot_product(vector([RKHSM(2,m,ex,x) for ex in self.X])))
+            f = lambda x: abs(sigma_m(x) - sigma_b(x))^2
+            area = self.TrapezoidRule(f,aye,self.b)
+            resultantList.append((m,cM,sigma_m,area))
+        self.sortedResultantList = sorted(resultantList,key=lambda result: result[0])
         
