@@ -164,8 +164,8 @@ class ExtrapolationOptimizationTest(CrossValidationRKHSN2):
         '''
         domainPoints = drange(self.gridPoints,a)
         domainPoints.sort()
-        xDeltas = vector([(d[i+1] - d[i]) for i in range(len(domainPoints)-1)])
-        fDeltas = vector([(f(d[i+1]) - f(d[i])) for i in range(len(domainPoints)-1)])
+        xDeltas = vector([(domainPoints[i+1] - domainPoints[i]) for i in range(len(domainPoints)-1)])
+        fDeltas = vector([(f(domainPoints[i+1]) - f(domainPoints[i])) for i in range(len(domainPoints)-1)])
         return (1.0/2.0) * xDeltas.dot_product(fDeltas)
     
     def __init__(self,FZ):
