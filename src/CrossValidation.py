@@ -3,7 +3,7 @@ Created on Feb 9, 2014
 
 @author: Jas
 '''
-from sage.symbolic.function_factory import function as funky
+from scipy import optimize
 from sage.all import *
 
 def EigenInverse(Q,La, L,M):
@@ -124,10 +124,14 @@ class CrossValidationRKHSM(CrossValidationParams):
         '''
         self.ems = srange(.1,10,.1) 
         CrossValidationParams.__init__(self, FZ, 1, 2, 1, 2, 1) #the last 5 entries are not important for RKHSM
-
+        
 class ExtrapolationOptimizationTest(CrossValidationRKHSN2):
-    def ArgMinGenerator(self):
+    
+    def ArgMinGenerator(self,x,*params):
+        gridPoints = self.gridPoints
+        rkhsN2 = self.c.dot_product(vector([RKHSN2(x,y,self.tau) for y in gridPoints]))
         
     def __init__(self,FZ):
         CrossValidationRKHSN2.__init__(self, FZ) 
+        #Fix Me m_bar, argminVal,T,feval,iters,accept,status =optimize.anneal(Approximation.AnnealingFunction, m0, args=params, schedule='fast', full_output=True, maxiter=5, lower=.001,upper=10, dwell=10, disp=False)
         
