@@ -47,7 +47,7 @@ class FlorenZmirou(Stock):
         Description: Step1: From stock, it will give us sigma(x)
                      Step2: Interpolate sigma(x) using step1.
         '''
-        Stock.__init__(self,kwds)
+        Stock.__init__(self,tickerParams=kwds)
         if len(self.StockPrices)==None:
             pass
         else:

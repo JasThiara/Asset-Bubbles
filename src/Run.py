@@ -7,28 +7,36 @@ from sage.all import *
 import csv, multiprocessing
 from datetime import date
 from FlorenZmirou import FlorenZmirou
-
+from CrossValidation import *
 def BuildNASDAQRowEntry(x):
-    return FlorenZmirou(tickerParams=[x[0],2,60,False,x[1]])
+    return FlorenZmirou(tickerParams=[x[0],1,60,False,x[1]])
 def BuildNYSERowEntry(x):
-    return FlorenZmirou(tickerParams=[x[0],2,60,True,x[1]])
+    return FlorenZmirou(tickerParams=[x[0],1,60,True,x[1]])
 
 if __name__ == '__main__':
-    nasdaqFileReader = open('TickerSymbols/NASDAQ.csv','r')
-    nyseFileReader = open('TickerSymbols/NYSE.csv','r')
+    nasdaqFileReader = open('TickerSymbols/bubbleTest.csv','r')
+    nasdaqFileWriter = open('TickerSymbols/bubbleOutput.csv','w')
     nasdaqCsvReader = csv.reader(nasdaqFileReader,delimiter=',')
-    nyseCsvReader = csv.reader(nyseFileReader,delimiter=',')
+    nasdaqCsvWriter = csv.writer(nasdaqFileWriter,delimiter=',')
     todaysDate = date.today()
-    try:
-        cpus = multiprocessing.cpu_count()
-    except NotImplementedError:
-        cpus = 2   # arbitrary default
-    nyseEntries = [row for row in nyseCsvReader]
-    nasdaqEntries = [row for row in nasdaqCsvReader]
-    NYSEflorenZmirouListPoolingProcess = multiprocessing.Pool(processes=cpus)
-    NASDAQflorenZmirouListPoolingProcess = multiprocessing.Pool(processes=cpus)
-    nyseFlorenZmirouList = NYSEflorenZmirouListPoolingProcess.map(BuildNYSERowEntry)
-    nyseFlorenZmirouList = NYSEflorenZmirouListPoolingProcess.map(BuildNYSERowEntry,nyseEntries)
-    nasdaqFlorenZmirouList = NASDAQflorenZmirouListPoolingProcess.map(BuildNASDAQRowEntry,nasdaqEntries)
-    florenZmirouList = nyseFlorenZmirouList.extend(nasdaqFlorenZmirouList)
+    fzList = [BuildNASDAQRowEntry(z) for z in nasdaqCsvReader]
+    for FZ in fzList:
+        crossValidationN1 = ExtrapolationOptimizationTestN1(FZ)
+        mBarN1 = crossValidationN1.sortedResultantList[0][0]
+        if mBarN1 < .9:
+            isBubble = False
+            mBarN2= -1
+        elif mBarN1 > 1.1:
+            isBubble = True
+            mBarN2= -1
+        else:
+            crossValidationN2 = ExtrapolationOptimizationTestN2(FZ)
+            mBarN2 = crossValidationN2.sortedResultantList[4]
+            if mBarN2 < .9:
+                isBubble = False
+            elif mBarN2 > 1.1:
+                isBubble = True
+            else:
+                isBubble = -1
+        nasdaqCsvWriter.writerow((FZ.CompanyName,FZ.Ticker,todaysDate,todaysDate,isBubble,mBarN1,mBarN2))
     

@@ -37,12 +37,12 @@ class Stock:
         4)the fourth element in the list is True or False.  True -> ticker is on NYSE, False -> ticker is on NASDAQ
         5)the fifth element in the list is the company name as a string
         '''
-        if Parameters[3]:
+        if Parameters['tickerParams'][3]:
             exchange = 'NYSE'
         else:
             exchange = 'NASD'
         currentTime = int(time.time())
-        link = 'http://www.google.com/finance/getprices?q=%s&x=%s&i=%d&p=%dd&f=d,c,o,h,l&df=cpct&auto=1&ts=%d'%(Parameters[0].upper(),exchange,Parameters[2],Parameters[1],currentTime)
+        link = 'http://www.google.com/finance/getprices?q=%s&x=%s&i=%d&p=%dd&f=d,c,o,h,l&df=cpct&auto=1&ts=%d'%(Parameters['tickerParams'][0].upper(),exchange,Parameters['tickerParams'][2],Parameters['tickerParams'][1],currentTime)
         # q = ticker, x = exchange, i = 60 seconds, p = days 
         # link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
         try:
@@ -81,8 +81,8 @@ class Stock:
             self.StockPrices=self.GetStockPrices(kwds['filename'])
         elif 'tickerParams' in kwds:
             self.StockPrices=self.GetGoogleData(kwds['tickerParams'])
-            self.Ticker = kwds['tickerParams'][0]
-            self.CompanyName = kwds['tickerParams'][4]
+            self.Ticker = kwds['tickerParams']['tickerParams'][0]
+            self.CompanyName = kwds['tickerParams']['tickerParams'][4]
         else:
             raise Exception("bad paramaters")
         self.maxPrice = self.GetMaxStockPrice()
