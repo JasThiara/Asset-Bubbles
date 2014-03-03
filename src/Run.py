@@ -27,6 +27,7 @@ if __name__ == '__main__':
     nasdaqEntries = [row for row in nasdaqCsvReader]
     NYSEflorenZmirouListPoolingProcess = multiprocessing.Pool(processes=cpus)
     NASDAQflorenZmirouListPoolingProcess = multiprocessing.Pool(processes=cpus)
+    nyseFlorenZmirouList = NYSEflorenZmirouListPoolingProcess.map(BuildNYSERowEntry)
     nyseFlorenZmirouList = NYSEflorenZmirouListPoolingProcess.map(BuildNYSERowEntry,nyseEntries)
     nasdaqFlorenZmirouList = NASDAQflorenZmirouListPoolingProcess.map(BuildNASDAQRowEntry,nasdaqEntries)
     florenZmirouList = nyseFlorenZmirouList.extend(nasdaqFlorenZmirouList)
