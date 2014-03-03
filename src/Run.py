@@ -31,7 +31,7 @@ if __name__ == '__main__':
             mBarN2= -1
         else:
             crossValidationN2 = ExtrapolationOptimizationTestN2(FZ)
-            mBarN2 = crossValidationN2.sortedResultantList[4]
+            mBarN2 = crossValidationN2.sortedResultantList[0][0]
             if mBarN2 < .9:
                 isBubble = False
             elif mBarN2 > 1.1:
