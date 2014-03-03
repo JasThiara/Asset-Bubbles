@@ -11,7 +11,6 @@ def drange(L, A):
     i = 0
     iMax = len(L)
     r = L[i]
-    isBelow = True
     while r < A:
         i += 1
         r = L[i]
@@ -68,21 +67,24 @@ class CrossValidationParams:
         return sortedLooeList
     
     def __init__(self,FZ,tauMin,tauMax,lambdaMin,lambdaMax,lambdaStepSize):
-        self.a = FZ.minPrice
-        self.b = FZ.maxPrice
-        self.gridPoints = FZ.GetGridInverseStandardDeviation()
-        self.gridSize = len(self.gridPoints)
-        self.taus = range(1,6)#1,2,...,9
-        self.lambdas = srange(.1,12,.75)
-        self.QN = self.GetQArray()#[(matrix(RR, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
-        self.X = vector([P[0] for P in self.gridPoints])
-        self.Y = vector([P[1] for P in self.gridPoints])
-        self.looeListSorted= self.LOOEGenerator()
-        self.L = self.looeListSorted[0][0]
-        self.tau = self.looeListSorted[0][1][1]
-        self.ChosenRKHS = self.looeListSorted[0][1][0]
-        self.c = self.looeListSorted[0][3] #needs to evaluate this with RKHSN2(self.a,self.b,self.gridPoints[i],X,tau) for any X to become an estimator
-        
+        if FZ.StockPrice == None:
+            pass
+        else:
+            self.a = FZ.minPrice
+            self.b = FZ.maxPrice
+            self.gridPoints = FZ.GetGridInverseStandardDeviation()
+            self.gridSize = len(self.gridPoints)
+            self.taus = range(1,6)#1,2,...,9
+            self.lambdas = srange(.1,12,.75)
+            self.QN = self.GetQArray()#[(matrix(RR, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
+            self.X = vector([P[0] for P in self.gridPoints])
+            self.Y = vector([P[1] for P in self.gridPoints])
+            self.looeListSorted= self.LOOEGenerator()
+            self.L = self.looeListSorted[0][0]
+            self.tau = self.looeListSorted[0][1][1]
+            self.ChosenRKHS = self.looeListSorted[0][1][0]
+            self.c = self.looeListSorted[0][3] #needs to evaluate this with RKHSN2(self.a,self.b,self.gridPoints[i],X,tau) for any X to become an estimator
+            
 
 class CrossValidationRKHSN2(CrossValidationParams):
     '''

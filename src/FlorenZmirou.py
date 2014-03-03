@@ -35,26 +35,32 @@ class FlorenZmirou(Stock):
         
         if tickerParams is used, it will use the google API to retrieve minute to minute data
         
-        Stock(tickerParams=['appl',10,60])
+        Stock(tickerParams=['appl',10,60,False])
         where 
+        Input
+        Parameters = [ticker,days,period,isNYSE,companyName]
         1)the first element in the list is a string of the ticker symbol, e.g. 'appl'
-        2)the second element in the list is the historical data period, e.g. 10
+        2)the second element in the list is the historical data period, e.g. 10 days
         3)the third element in the list is the period of data in seconds, e.g. 60 (seconds)
-        
+        4)the fourth element in the list is True or False.  True -> ticker is on NYSE, False -> ticker is on NASDAQ
+        5)the fifth element in the list is the company name as a string
         Description: Step1: From stock, it will give us sigma(x)
                      Step2: Interpolate sigma(x) using step1.
         '''
         Stock.__init__(self,kwds)
-        self.GridPoints = self.GetGridPoints()
-        self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
-        self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n) for ex in self.StockPrices]# these are the sigma values evulated at the grid points
-        self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
-        self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
-        self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
-        self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
-        self.GridVariance = self.GetGridVariance()
-        self.InterpolatedRange = (self.minPrice,self.maxPrice)
-        self.CreateZmirouTable()
+        if len(self.StockPrices)==None:
+            pass
+        else:
+            self.GridPoints = self.GetGridPoints()
+            self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
+            self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n) for ex in self.StockPrices]# these are the sigma values evulated at the grid points
+            self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
+            self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
+            self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
+            self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
+            self.GridVariance = self.GetGridVariance()
+            self.InterpolatedRange = (self.minPrice,self.maxPrice)
+            self.CreateZmirouTable()
         
     def GetGridInverseStandardDeviation(self):
         '''

@@ -30,12 +30,14 @@ class Stock:
     def GetGoogleData(self,Parameters):
         '''
         Input
-        Parameters = [ticker,days,period]
+        Parameters = [ticker,days,period,isNYSE,CompanyName]
         1)the first element in the list is a string of the ticker symbol, e.g. 'appl'
         2)the second element in the list is the historical data period, e.g. 10 days
         3)the third element in the list is the period of data in seconds, e.g. 60 (seconds)
+        4)the fourth element in the list is True or False.  True -> ticker is on NYSE, False -> ticker is on NASDAQ
+        5)the fifth element in the list is the company name as a string
         '''
-        if len(Parameters[0]) <=  3:
+        if Parameters[3]:
             exchange = 'NYSE'
         else:
             exchange = 'NASD'
@@ -43,13 +45,16 @@ class Stock:
         link = 'http://www.google.com/finance/getprices?q=%s&x=%s&i=%d&p=%dd&f=d,c,o,h,l&df=cpct&auto=1&ts=%d'%(Parameters[0].upper(),exchange,Parameters[2],Parameters[1],currentTime)
         # q = ticker, x = exchange, i = 60 seconds, p = days 
         # link = 'http://www.google.com/finance/getprices?i=%d&p=%dd&f=d,o,h,l,c,v&df=cpct&q=%s&x=%s'%(Parameters[2],Parameters[1],Parameters[0],exchange)
-        filePtr = urllib.urlopen(link)
-        DataList = filePtr.readlines()
-        tickerData = DataList[7:len(DataList)]
-        stockPrices = []
-        for minuteData in tickerData:
-            datum = minuteData.split(',')
-            stockPrices.append(float(datum[1]))
+        try:
+            filePtr = urllib.urlopen(link)
+            DataList = filePtr.readlines()
+            tickerData = DataList[7:len(DataList)]
+            stockPrices = []
+            for minuteData in tickerData:
+                datum = minuteData.split(',')
+                stockPrices.append(float(datum[1]))
+        except:
+            pass
         return stockPrices
         
     def __init__(self,**kwds):
@@ -63,11 +68,13 @@ class Stock:
         
         if tickerParams is used, it will use the google API to retrieve minute to minute data
         
-        Stock(tickerParams=['appl',10,60])
+        Stock(tickerParams=[ticker,days,period,isNYSE,CompanyName])
         where 
         1)the first element in the list is a string of the ticker symbol, e.g. 'appl'
-        2)the second element in the list is the historical data period, e.g. 10
+        2)the second element in the list is the historical data period, e.g. 10 days
         3)the third element in the list is the period of data in seconds, e.g. 60 (seconds)
+        4)the fourth element in the list is True or False.  True -> ticker is on NYSE, False -> ticker is on NASDAQ
+        5)the fifth element in the list is the company name as a string
         Description: it will give us list of stock prices from csv file.
         ''' 
         if 'filename' in kwds:
@@ -75,6 +82,7 @@ class Stock:
         elif 'tickerParams' in kwds:
             self.StockPrices=self.GetGoogleData(kwds['tickerParams'])
             self.Ticker = kwds['tickerParams'][0]
+            self.CompanyName = kwds['tickerParams'][4]
         else:
             raise Exception("bad paramaters")
         self.maxPrice = self.GetMaxStockPrice()
