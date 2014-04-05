@@ -79,12 +79,12 @@ class EulerMaruyama(Stock):
         end
         '''
         Lambda = 2.0
-        mu = 1.0
-        X0 = 1.0
+        mu = 2#mu * X = sigma(x)  We need to throw this variable high to make the SDE to behave as a bubble.
+        X0 = 100.0
         T = 1.0
         En = 2**en
         dt = 1.0/En
-        dW = sqrt(dt) * vector(randn(1,En)[0].tolist())
+        dW = sqrt(dt) * vector(randn(1,En)[0].tolist()) #+ mu * vector(ones_matrix(1,En).list())
         R=4.0
         Dt =R*dt
         L =En/R
@@ -96,14 +96,14 @@ class EulerMaruyama(Stock):
             Xem[j] = Xtemp
         return Xem;
     
-    def __init__(self,n):
+    def __init__(self,en):
         '''
         Constructor
         Input:
-        n - Number of samples to create
+        en - Number of samples to create
         Output  an inherited Stock class with this.StockPrices to have 2**(n-2) entries
         '''
-        self.StockPrices = self.GenerateStockPrices()
+        self.StockPrices = self.GenerateStockPrices(en)
         self.Ticker = None
         self.CompanyName = None
         self.maxPrice = max(self.StockPrices)

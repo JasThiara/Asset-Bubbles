@@ -5,10 +5,11 @@ Created on Oct 27, 2013
 '''
 from sage.all import *
 from Stock import Stock
+from EulerMaruyama import EulerMaruyama
 from Spline import NaturalCubicSpline
 import locale
 import sys
-class FlorenZmirou(Stock):
+class FlorenZmirou(Stock,EulerMaruyama):
     '''
     FlorenZmirou will provide us list of sigma values and interpolation from list of stock prices
     '''
@@ -47,13 +48,18 @@ class FlorenZmirou(Stock):
         Description: Step1: From stock, it will give us sigma(x)
                      Step2: Interpolate sigma(x) using step1.
         '''
-        Stock.__init__(self,tickerParams=kwds)
+        if 'tickerParams' in kwds:
+            Stock.__init__(self,tickerParams=kwds)
+        elif 'filename' in kwds:
+            Stock.__init__(self,filename=kwds)
+        elif 'en' in kwds:
+            EulerMaruyama.__init__(self,kwds['en'])
         if len(self.StockPrices)==None:
             pass
         else:
             self.GridPoints = self.GetGridPoints()
             self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
-            self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n) for ex in self.StockPrices]# these are the sigma values evulated at the grid points
+            self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
             self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
             self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
             self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
@@ -68,8 +74,9 @@ class FlorenZmirou(Stock):
         Gets floren zmirou estimation over usable grid points
         '''
         Points = []
+        half_x_hn = self.x_step_size(self.StockPrices)/2.0
         for x in self.UsableGridPoints:
-            y = 1/sqrt(self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n) )
+            y = 1/self.Volatility_estimation(self.T,self.StockPrices,x,self.n,half_x_hn)**2
             Points.append((x,y))
         return Points
     def GetGridVariance(self):
@@ -79,7 +86,7 @@ class FlorenZmirou(Stock):
         '''
         Points = []
         for x in self.UsableGridPoints:
-            y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n) 
+            y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n)**2 
             Points.append((x,y))
         return Points
     def GetCubicInterpolatedVariance(self):
@@ -223,7 +230,7 @@ class FlorenZmirou(Stock):
         Recipe:           step1: 
                               for Si in S1,S2....Sn:
                                    for x in X1,X2...Xm:
-                                      if |Si-x|<h_n:
+                                      if |Si-x|<x_hn:
                                         step 2: 
                                         Add Si into list corresponding to x
                                Step 3:
@@ -238,11 +245,13 @@ class FlorenZmirou(Stock):
         '''
         usableGridPoints = x
         d = dict()# Creating empty dictionary
+        x_hn = self.x_step_size(S)
+        halfh_n = x_hn/2.0
         stockPriceCount = float(len(S)) 
         for gridPoint in x:# The grid points are your keys
             d[gridPoint]=list()#a dictionary where the keys are the grid points and the value is a list for each grid point (used in Step 2)
             for stockPrice in S:# stock price in S    
-                if  abs(gridPoint-stockPrice)<h_n:# satisfying the condition if true then add x value to corresponding Si
+                if  abs(gridPoint-stockPrice)<halfh_n:# satisfying the condition if true then add x value to corresponding Si
                     d[gridPoint].append(stockPrice)#Note the number of points for the gridPoint is len(d[gridPoint])
         for gridPoint in x:
             listOfPointsForGridPoint = d[gridPoint]
