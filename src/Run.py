@@ -15,7 +15,7 @@ def BuildNYSERowEntry(x):
 
 if __name__ == '__main__':
     nasdaqFileReader = open('TickerSymbols/bubbleTest.csv','r')
-    nasdaqFileWriter = open('TickerSymbols/bubbleOutput.csv','w' )
+    nasdaqFileWriter = open('TickerSymbols/bubbleOutput.csv','w')
     nasdaqCsvReader = csv.reader(nasdaqFileReader,delimiter=',')
     nasdaqCsvWriter = csv.writer(nasdaqFileWriter,delimiter=',')
     todaysDate = date.today()
