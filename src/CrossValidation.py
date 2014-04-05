@@ -80,8 +80,8 @@ class CrossValidationParams:
             self.X = vector([P[0] for P in self.gridPoints])
             self.Y = vector([P[1] for P in self.gridPoints])
             self.gridSize = len(self.gridPoints)
-            self.taus = range(1,6)#1,2,...,9
-            self.lambdas = srange(.1,12,.75)
+            self.taus = range(tauMin,tauMax)#1,2,...,9
+            self.lambdas = srange(lambdaMin,lambdaMax,lambdaStepSize)
             self.QN = self.GetQArray()#[(matrix(QQ, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
             self.looeListSorted= self.LOOEGenerator()
             self.L = self.looeListSorted[0][0]
