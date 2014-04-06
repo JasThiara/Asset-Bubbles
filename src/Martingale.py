@@ -28,11 +28,13 @@ class MartingaleTesting:
         self.b = CV.b
         self.gridPoints = CV.gridPoints
         #self.fb = lambda x: self.c.dot_product(vector([RKHSN1(self.a,self.b,x,y,self.tau) for y in self.gridPoints]))
-        self.rkhsN1Variance = lambda x: (1/self.c.dot_product(vector([RKHSN1(self.a,self.b,x,y,self.tauN1) for y in self.gridPoints])))**2
-        stockPricePlot = points(zip(range(len(FZ.StockPrices)),FZ.StockPrices), color='green')
-        rkhsN1Plot = points(zip(FZ.StockPrices,[self.rkhsN1Variance(x) for x in FZ.StockPrices]),color='blue')
+        self.rkhsN1Variance = lambda x: (1/self.c.dot_product(vector([RKHSN1(self.a,self.b,x,pt[0],self.tauN1) for pt in self.gridPoints])))**2
+        G = zip(FZ.StockPrices,[self.rkhsN1Variance(x) for x in FZ.StockPrices])
+        rkhsN1Plot = points(G,color='blue')
         estimatedVariancePlot = points(zip(FZ.StockPrices,FZ.EstimatedVariance),color='red')
-        (rkhsN1Plot + estimatedVariancePlot).save('RKHSn1Test.png')
+        stockPricePlot = points(zip(range(len(FZ.StockPrices)),FZ.StockPrices), color='green')
+        rkhsN1Plot.save('rkhsN1Plot.png')
+        estimatedVariancePlot.save('florenZmirou.png')
         stockPricePlot.save('stockPriceTest.png')
         
         

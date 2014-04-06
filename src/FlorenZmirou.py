@@ -256,10 +256,11 @@ class FlorenZmirou(Stock,EulerMaruyama):
         for gridPoint in x:
             listOfPointsForGridPoint = d[gridPoint]
             numberOfPointsInList = float(len(listOfPointsForGridPoint))
-            percentOfStockPrices = numberOfPointsInList / stockPriceCount
+            percentOfStockPrices = float(numberOfPointsInList) / float(stockPriceCount)
             if  percentOfStockPrices < Y:# We just want to remove the number grid points from the dictionary since we have all data.
                 usableGridPoints.remove(gridPoint)
-                del d[gridPoint]#pop(key[, default]) If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.
+                d.pop(gridPoint,None)
+                #del d[gridPoint]#pop(key[, default]) If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.
         return usableGridPoints, d# 1) the list of usable grid points 2) for each usable grid point, the list of usable grid points
 
     def format_num(self,num):

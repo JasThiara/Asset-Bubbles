@@ -83,12 +83,15 @@ class CrossValidationParams:
             self.taus = range(tauMin,tauMax)#1,2,...,9
             self.lambdas = srange(lambdaMin,lambdaMax,lambdaStepSize)
             self.QN = self.GetQArray()#[(matrix(QQ, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.gridPoints[i],self.gridPoints[j],tau)),tau) for tau in self.taus]
-            self.looeListSorted= self.LOOEGenerator()
-            self.L = self.looeListSorted[0][0]
-            self.tau = self.looeListSorted[0][1][1]
-            self.ChosenRKHS = self.looeListSorted[0][1][0]
-            self.c = self.looeListSorted[0][3] #needs to evaluate this with RKHSN2(self.a,self.b,self.gridPoints[i],X,tau) for any X to become an estimator
-            
+            if len(self.QN)>0:
+                self.looeListSorted= self.LOOEGenerator()
+                self.L = self.looeListSorted[0][0]
+                self.tau = self.looeListSorted[0][1][1]
+                self.ChosenRKHS = self.looeListSorted[0][1][0]
+                self.c = self.looeListSorted[0][3] #needs to evaluate this with RKHSN2(self.a,self.b,self.gridPoints[i],X,tau) for any X to become an estimator
+            else:
+                raise Exception("bad QN data")
+                
 
 class CrossValidationRKHSN2(CrossValidationParams):
     '''
@@ -96,7 +99,7 @@ class CrossValidationRKHSN2(CrossValidationParams):
     RKHSN2
     '''
     def GetQArray(self):
-        return [(matrix(QQ, self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.X[i],self.X[j],tau)),tau) for tau in self.taus]
+        return [(matrix(RealDoubleField(), self.gridSize, self.gridSize,lambda i,j: RKHSN2(self.X[i],self.X[j],tau)),tau) for tau in self.taus]
     
     def __init__(self,FZ):
         '''
@@ -115,7 +118,17 @@ class CrossValidationRKHSN1(CrossValidationParams):
     RKHSN1
     '''
     def GetQArray(self):
-        return [(matrix(QQ, self.gridSize, self.gridSize, lambda i,j: RKHSN1(self.a,self.b,self.X[i],self.X[j],tau)),tau) for tau in self.taus]
+        L = list()
+        for tau in self.taus:
+            M = matrix(RealDoubleField(),self.gridSize)
+            for i in range(self.gridSize):
+                for j in range(self.gridSize):
+                    M[i,j] =  RKHSN1(self.a,self.b,self.X[i],self.X[j],tau)
+            if +Infinity in M.list() or NaN in M.list() or -Infinity in M.list():
+                continue
+            else:
+                L.append((M,tau))
+        return L
     def __init__(self, FZ):
         '''
         Constructor
@@ -132,7 +145,7 @@ class CrossValidationRKHSM(CrossValidationParams):
     RKHSM.  However we're not sorting on min ||LOOE(RKHSM)||  we are sorting on Argmin sqrt(int(sigma_m - sigma^b))
     '''
     def GetQArray(self):
-        return [(matrix(QQ, self.gridSize, self.gridSize, lambda i,j: RKHSM(2,m,self.X[i],self.X[j])),m) for m in self.ems]
+        return [(matrix(RealDoubleField(), self.gridSize, self.gridSize, lambda i,j: RKHSM(2,m,self.X[i],self.X[j])),m) for m in self.ems]
     def __init__(self,FZ):
         '''
         Constructor
@@ -146,7 +159,7 @@ class CrossValidationRKHSM(CrossValidationParams):
         
 class ExtrapolationOptimizationTestN2(CrossValidationRKHSN2):
     def GetQArrayM(self):
-        return [(matrix(QQ, self.gridSize, self.gridSize, lambda i,j: RKHSMN2(m,self.X[i],self.X[j])),m) for m in self.ems]
+        return [(matrix(RealDoubleField(), self.gridSize, self.gridSize, lambda i,j: RKHSMN2(m,self.X[i],self.X[j])),m) for m in self.ems]
     def LOOEGeneratorRKHSM(self): 
         '''
         description: creates the eigenvectors and diagonal matrix of eigenvalues for each matrix
@@ -222,7 +235,7 @@ class ExtrapolationOptimizationTestN2(CrossValidationRKHSN2):
 
 class ExtrapolationOptimizationTestN1(CrossValidationRKHSN1):
     def GetQArrayM(self):
-        return [(matrix(QQ, self.gridSize, self.gridSize, lambda i,j: RKHSMN1(m)),m) for m in self.ems]
+        return [(matrix(RealDoubleField(), self.gridSize, self.gridSize, lambda i,j: RKHSMN1(m)),m) for m in self.ems]
     def LOOEGeneratorRKHSM(self): 
         '''
         description: creates the eigenvectors and diagonal matrix of eigenvalues for each matrix
