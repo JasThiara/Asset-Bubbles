@@ -44,6 +44,7 @@ emerr= abs(Xem(end)-Xtrue(end))% computed emerr found and taking R delta t
 from Stock import Stock
 from sage.all import *
 from numpy.random import randn
+from BrownianMotion import GetExponentialBrownianVector
 def frange(x, y, jump):
     while x < y:
         yield x
@@ -103,7 +104,10 @@ class EulerMaruyama(Stock):
         en - Number of samples to create
         Output  an inherited Stock class with this.StockPrices to have 2**(n-2) entries
         '''
-        self.StockPrices = self.GenerateStockPrices(en)
+        #self.StockPrices = self.GenerateStockPrices(en)
+        k = 2
+        x0=100
+        self.StockPrices = GetExponentialBrownianVector(2**(en-2),x0,k)
         self.Ticker = None
         self.CompanyName = None
         self.maxPrice = max(self.StockPrices)
