@@ -19,7 +19,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
         Output: Returns list of grid points
         '''
         self.n = len(self.StockPrices)
-        self.h_n= self.Derive_hn(self.StockPrices)
+        self.h_n = self.Derive_hn(self.StockPrices)
         self.T = 60*self.n # 60 sec times total number of data points because T is every minute from [0,T]
         return self.Derive_x_values(self.StockPrices)
     
@@ -76,7 +76,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
         '''
         Points = []
         half_x_hn = self.x_step_size(self.StockPrices)/2.0
-        for x in self.UsableGridPoints:
+        for x in self.StockPricesByGridPointDictionary.iterkeys():
             y = 1/self.Volatility_estimation(self.T,self.StockPrices,x,self.n,half_x_hn)**2
             Points.append((x,y))
         return Points
@@ -86,16 +86,18 @@ class FlorenZmirou(Stock,EulerMaruyama):
         Gets floren zmirou estimation over usable grid points
         '''
         Points = []
-        for x in self.UsableGridPoints:
-            y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n)**2 
+        half_x_hn = self.x_step_size(self.StockPrices)/2.0
+        for x in self.StockPricesByGridPointDictionary.iterkeys():
+            y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,half_x_hn)**2 
             Points.append((x,y))
         return Points
     def GetGridSigma(self):
-	Points = []
-	for x in self.UsableGridPoints:
-	    y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n)
-	    Points.append((x,y))
-	return Points
+        Points = []
+        half_x_hn = self.x_step_size(self.StockPrices)/2.0
+        for x in self.StockPricesByGridPointDictionary.iterkeys():
+            y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,half_x_hn)
+        Points.append((x,y))
+        return Points
     
     def GetCubicInterpolatedVariance(self):
         '''
@@ -106,12 +108,12 @@ class FlorenZmirou(Stock,EulerMaruyama):
         return NaturalCubicSpline(Points)
 
     def GetCubicSplineInterpolatedStandardDeviation(self):
-	'''
-	Description: creates a cubic spline interpolation of sigma by the grid points.
-	Output: give a list of grid points and estimated sigma, spline(Points) is an object such that it is the value of the cubic spline interpolation through the points in grid points and estimated sigma
-	'''
-	Points = self.GetGridSigma()
-	return NatualCubicSpline(Points)
+    	'''
+    	Description: creates a cubic spline interpolation of sigma by the grid points.
+    	Output: give a list of grid points and estimated sigma, spline(Points) is an object such that it is the value of the cubic spline interpolation through the points in grid points and estimated sigma
+    	'''
+        Points = self.GetGridSigma()
+        return NaturalCubicSpline(Points)
 
     def Sublocal_Time(self,T,S,x,n,h_n):
         """
@@ -197,6 +199,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
         n = len(S)
         h_n = 1.0/n**(1.0/3.0)
         return h_n
+    
     def x_step_size(self,S):
         """
         Derive x values function
@@ -269,10 +272,8 @@ class FlorenZmirou(Stock,EulerMaruyama):
             for stockPrice in S:# stock price in S    
                 if  abs(gridPoint-stockPrice)<halfh_n:# satisfying the condition if true then add x value to corresponding Si
                     d[gridPoint].append(stockPrice)#Note the number of points for the gridPoint is len(d[gridPoint])
-        for gridPoint in x:
-            listOfPointsForGridPoint = d[gridPoint]
-            numberOfPointsInList = float(len(listOfPointsForGridPoint))
-            percentOfStockPrices = float(numberOfPointsInList) / float(stockPriceCount)
+            numberOfPointsInList = float(len(d[gridPoint]))
+            percentOfStockPrices = numberOfPointsInList / float(stockPriceCount)
             if  percentOfStockPrices < Y:# We just want to remove the number grid points from the dictionary since we have all data.
                 usableGridPoints.remove(gridPoint)
                 d.pop(gridPoint,None)
