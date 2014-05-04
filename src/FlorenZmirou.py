@@ -89,13 +89,28 @@ class FlorenZmirou(Stock,EulerMaruyama):
             y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n)**2 
             Points.append((x,y))
         return Points
+    def GetGridSigma(self):
+	Points = []
+	for x in self.UsableGridPoints:
+	    y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,self.h_n)
+	    Points.append((x,y))
+	return Points
+    
     def GetCubicInterpolatedVariance(self):
         '''
-        Description: It will give us cubic spline interpolation of sigma of grid points.
-        Output: Given a list of grid points and estimated sigma, spline(Points) is an object such that spline(Points) is the value of the spline interpolation through the points in grid points and estimated sigma
+        Description: It will give us cubic spline interpolation of sigma squared of grid points.
+        Output: Given a list of grid points and estimated sigma squared, spline(Points) is an object such that spline(Points) is the value of the spline interpolation through the points in grid points and estimated sigma squared
         '''
         Points = self.GetGridVariance()
         return NaturalCubicSpline(Points)
+
+    def GetCubicSplineInterpolatedStandardDeviation(self):
+	'''
+	Description: creates a cubic spline interpolation of sigma by the grid points.
+	Output: give a list of grid points and estimated sigma, spline(Points) is an object such that it is the value of the cubic spline interpolation through the points in grid points and estimated sigma
+	'''
+	Points = self.GetGridSigma()
+	return NatualCubicSpline(Points)
 
     def Sublocal_Time(self,T,S,x,n,h_n):
         """
