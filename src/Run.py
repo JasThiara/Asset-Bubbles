@@ -14,6 +14,11 @@ def BuildNYSERowEntry(x):
     return FlorenZmirou(tickerParams=[x[0],1,60,True,x[1]])
 
 if __name__ == '__main__':
+    FZ = FlorenZmirou(tickerParams=['appl',1,60,False])
+    FZ.EstimatedStandardDeviation.save('appl_stddev.png')
+    FZ.EstimatedVariance.save('appl_variance.png')
+'''
+if __name__ == '__main__':
     nasdaqFileReader = open('TickerSymbols/bubbleTest.csv','r')
     nasdaqFileWriter = open('TickerSymbols/bubbleOutput.csv','w')
     nasdaqCsvReader = csv.reader(nasdaqFileReader,delimiter=',')
@@ -39,4 +44,5 @@ if __name__ == '__main__':
             else:
                 isBubble = -1
         nasdaqCsvWriter.writerow((FZ.CompanyName,FZ.Ticker,todaysDate,todaysDate,isBubble,mBarN1,mBarN2))
+'''
     

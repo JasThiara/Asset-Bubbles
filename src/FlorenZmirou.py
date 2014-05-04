@@ -64,6 +64,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
             self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
             self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
             self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
+            self.CubicInterpolatedStandardDeviation = self.GetCubicSplineInterpolatedStandardDeviation()
             self.GridVariance = self.GetGridVariance()
             self.InterpolatedRange = (self.minPrice,self.maxPrice)
             self.CreateZmirouTable()
