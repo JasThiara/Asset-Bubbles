@@ -37,6 +37,7 @@ class Stock:
         4)the fourth element in the list is True or False.  True -> ticker is on NYSE, False -> ticker is on NASDAQ
         5)the fifth element in the list is the company name as a string
         '''
+        stockPrices = []
         if Parameters['tickerParams'][3]:
             exchange = 'NYSE'
         else:
@@ -49,7 +50,6 @@ class Stock:
             filePtr = urllib.urlopen(link)
             DataList = filePtr.readlines()
             tickerData = DataList[7:len(DataList)]
-            stockPrices = []
             for minuteData in tickerData:
                 datum = minuteData.split(',')
                 stockPrices.append(float(datum[1]))

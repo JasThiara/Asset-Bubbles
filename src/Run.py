@@ -14,7 +14,7 @@ def BuildNYSERowEntry(x):
     return FlorenZmirou(tickerParams=[x[0],1,60,True,x[1]])
 
 if __name__ == '__main__':
-    FZ = FlorenZmirou(tickerParams=['appl',1,60,False])
+    FZ = FlorenZmirou(tickerParams=['AMZN',1,60,False,'Amazon inc'])
     FZ.EstimatedStandardDeviation.save('appl_stddev.png')
     FZ.EstimatedVariance.save('appl_variance.png')
 '''
