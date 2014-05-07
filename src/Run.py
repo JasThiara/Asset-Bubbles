@@ -14,11 +14,12 @@ def BuildNYSERowEntry(x):
     return FlorenZmirou(tickerParams=[x[0],1,60,True,x[1]])
 
 if __name__ == '__main__':
-    FZ = FlorenZmirou(tickerParams=['AAPL',1,60,False,'Appl inc'])
-    FZ.CubicInterpolatedVariance.plot().save('aapl_stddev_spline.png')
-    FZ.CubicInterpolatedStandardDeviation.plot().save('aapl_variance_spline.png')
-    list_plot(FZ.StockPrices).save('aapl_stock_price.png')
-    list_plot(FZ.EstimatedStandardDeviation).save('aapl_FZ_stddev_estimation.png')
+    L = ['MWIV',1,60,False,'Akao inc']
+    FZ = FlorenZmirou(tickerParams=L)
+    FZ.CubicInterpolatedVariance.plot().save('%s_stddev_spline.png'%L[0])
+    FZ.CubicInterpolatedStandardDeviation.plot().save('%s_variance_spline.png'%L[0])
+    list_plot(FZ.StockPrices).save('%s_stock_price.png'%L[0])
+    list_plot(FZ.EstimatedStandardDeviation).save('%s_FZ_stddev_estimation.png'%L[0])
 '''
 if __name__ == '__main__':
     nasdaqFileReader = open('TickerSymbols/bubbleTest.csv','r')

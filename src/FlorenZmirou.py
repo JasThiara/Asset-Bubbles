@@ -59,7 +59,9 @@ class FlorenZmirou(Stock,EulerMaruyama):
         else:
             self.GridPoints = self.GetGridPoints()
             self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
+            
             self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
+            self.CreateZmirouTable()
             self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
             self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
             self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
@@ -67,7 +69,6 @@ class FlorenZmirou(Stock,EulerMaruyama):
             self.CubicInterpolatedStandardDeviation = self.GetCubicSplineInterpolatedStandardDeviation()
             self.GridVariance = self.GetGridVariance()
             self.InterpolatedRange = (self.minPrice,self.maxPrice)
-            self.CreateZmirouTable()
         
     def GetGridInverseStandardDeviation(self):
         '''
@@ -96,7 +97,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
         half_x_hn = self.x_step_size(self.StockPrices)/2.0
         for x in self.StockPricesByGridPointDictionary.iterkeys():
             y = self.Volatility_estimation(self.T,self.StockPrices,x,self.n,half_x_hn)
-        Points.append((x,y))
+            Points.append((x,y))
         return Points
     
     def GetCubicInterpolatedVariance(self):
