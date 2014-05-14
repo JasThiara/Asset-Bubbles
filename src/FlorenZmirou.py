@@ -61,6 +61,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
             self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
             
             self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
+            self.PriceEstimatedVarianceDictionary = {ex:self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices} 
             self.CreateZmirouTable()
             self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
             self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
@@ -327,7 +328,8 @@ class FlorenZmirou(Stock,EulerMaruyama):
         table.append(columnNames)
         gridPoints = self.UsableGridPoints
         estimatedSigma = self.EstimatedVariance
-        for i in range(len(gridPoints)):
-            table.append([str(gridPoints[i]), str(estimatedSigma[i]), str(len(self.StockPricesByGridPointDictionary[gridPoints[i]]))])
+        #for i in range(len(gridPoints)):i
+	for gridPoint,StockPrices in self.StockPricesByGridPointDictionary.iteritems(): 
+            table.append([str(gridPoint), str(self.Volatility_estimation(self.T,self.StockPrices,gridPoint,self.n,self.x_step_size(self.StockPrices)/2.0)**2), str(len(StockPrices))])
         out = sys.stdout
         return self.pprint_table(out, table)
