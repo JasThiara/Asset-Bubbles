@@ -63,7 +63,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
             self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
             self.PriceEstimatedVarianceDictionary = {ex:self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices} 
             self.CreateZmirouTable()
-            self.EstimatedStandardDeviation = [i**(1/2) for i in self.EstimatedVariance]
+            self.EstimatedStandardDeviation = [i**(1.0/2.0) for i in self.EstimatedVariance]
             self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
             self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
             self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
