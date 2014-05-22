@@ -14,7 +14,7 @@ def BuildNYSERowEntry(x):
     return FlorenZmirou(tickerParams=[x[0],1,60,True,x[1]])
 
 if __name__ == '__main__':
-    L = ['GOOG',1,60,False,'Akao inc']
+    L = ['AAPL',1,60,False,'goog inc']
     FZ = FlorenZmirou(tickerParams=L)
     FZ.CubicInterpolatedVariance.plot().save('%s_stddev_spline.png'%L[0])
     FZ.CubicInterpolatedStandardDeviation.plot().save('%s_variance_spline.png'%L[0])
