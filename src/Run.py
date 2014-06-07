@@ -36,7 +36,7 @@ if __name__ == '__main__':
             list_plot(FZ.StockPrices).save('../gfx/%s_stock_price.png'%z[0])
             list_plot(FZ.EstimatedStandardDeviation).save('../gfx/%s_FZ_stddev_estimation.png'%z[0])
             isBubble = FZ.InterpolationBubbleTest
-            nasdaqCsvWriter.writerow((FZ.CompanyName,FZ.Ticker,todaysDate,isBubble))
+            nasdaqCsvWriter.writerow((FZ.CompanyName,FZ.Ticker,todaysDate,isBubble,FZ.UsableGridPoints, min(FZ.StockPrice), max(FZ.StockPrice),))
         except:
             pass
     
