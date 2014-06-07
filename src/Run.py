@@ -12,9 +12,9 @@ def BuildNASDAQRowEntry(x):
     return FlorenZmirou(tickerParams=[x[0],1,60,False,x[1]])
 def BuildNYSERowEntry(x):
     return FlorenZmirou(tickerParams=[x[0],1,60,True,x[1]])
-
+'''
 if __name__ == '__main__':
-    L = ['BBRY',1,60,False,'goog inc']
+    L = ['GRPN',1,60,False,'goog inc']
     FZ = FlorenZmirou(tickerParams=L)
     FZ.CubicInterpolatedVariance.plot().save('%s_variance_spline.png'%L[0])
     FZ.CubicInterpolatedStandardDeviation.plot().save('%s_stdDev_spline.png'%L[0])
@@ -22,30 +22,21 @@ if __name__ == '__main__':
     list_plot(FZ.EstimatedStandardDeviation).save('%s_FZ_stddev_estimation.png'%L[0])
 '''
 if __name__ == '__main__':
-    nasdaqFileReader = open('TickerSymbols/bubbleTest.csv','r')
+    nasdaqFileReader = open('TickerSymbols/NASDAQ.csv','r')
     nasdaqFileWriter = open('TickerSymbols/bubbleOutput.csv','w')
     nasdaqCsvReader = csv.reader(nasdaqFileReader,delimiter=',')
     nasdaqCsvWriter = csv.writer(nasdaqFileWriter,delimiter=',')
     todaysDate = date.today()
-    fzList = [BuildNASDAQRowEntry(z) for z in nasdaqCsvReader]
-    for FZ in fzList:
-        crossValidationN1 = ExtrapolationOptimizationTestN1(FZ)
-        mBarN1 = crossValidationN1.sortedResultantList[0][0]
-        if mBarN1 < .9:
-            isBubble = False
-            mBarN2= -1
-        elif mBarN1 > 1.1:
-            isBubble = True
-            mBarN2= -1
-        else:
-            crossValidationN2 = ExtrapolationOptimizationTestN2(FZ)
-            mBarN2 = crossValidationN2.sortedResultantList[0][0]
-            if mBarN2 < .9:
-                isBubble = False
-            elif mBarN2 > 1.1:
-                isBubble = True
-            else:
-                isBubble = -1
-        nasdaqCsvWriter.writerow((FZ.CompanyName,FZ.Ticker,todaysDate,todaysDate,isBubble,mBarN1,mBarN2))
-'''
+    #fzList = [BuildNASDAQRowEntry(z) for z in nasdaqCsvReader]
+    for z in nasdaqCsvReader:
+        try:
+            FZ = BuildNASDAQRowEntry(z)
+            FZ.CubicInterpolatedVariance.plot().save('../gfx/%s_variance_spline.png'%z[0])
+            FZ.CubicInterpolatedStandardDeviation.plot().save('../gfx/%s_stdDev_spline.png'%z[0])
+            list_plot(FZ.StockPrices).save('../gfx/%s_stock_price.png'%z[0])
+            list_plot(FZ.EstimatedStandardDeviation).save('../gfx/%s_FZ_stddev_estimation.png'%z[0])
+            isBubble = FZ.InterpolationBubbleTest
+            nasdaqCsvWriter.writerow((FZ.CompanyName,FZ.Ticker,todaysDate,isBubble))
+        except:
+            pass
     

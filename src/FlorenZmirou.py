@@ -54,22 +54,54 @@ class FlorenZmirou(Stock,EulerMaruyama):
             Stock.__init__(self,filename=kwds)
         elif 'en' in kwds:
             EulerMaruyama.__init__(self,kwds['en'])
-        if len(self.StockPrices)==None:
+        if not hasattr(self,'StockPrices'):
             pass
         else:
-            self.GridPoints = self.GetGridPoints()
-            self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
-            
-            self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
-            self.PriceEstimatedVarianceDictionary = {ex:self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices} 
-            self.CreateZmirouTable()
-            self.EstimatedStandardDeviation = [i**(1.0/2.0) for i in self.EstimatedVariance]
-            self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
-            self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
-            self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
-            self.CubicInterpolatedStandardDeviation = self.GetCubicSplineInterpolatedStandardDeviation()
-            self.GridVariance = self.GetGridVariance()
-            self.InterpolatedRange = (self.minPrice,self.maxPrice)
+            if len(self.StockPrices) > 30 :
+                self.GridPoints = self.GetGridPoints()
+                self.UsableGridPoints, self.StockPricesByGridPointDictionary = self.DoGridAnalysis(self.T,self.StockPrices,self.GridPoints,self.n,self.h_n,.05)
+                if len(self.UsableGridPoints) >= 3:
+                    self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
+                    self.PriceEstimatedVarianceDictionary = {ex:self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices} 
+                    self.CreateZmirouTable()
+                    self.EstimatedStandardDeviation = [i**(1.0/2.0) for i in self.EstimatedVariance]
+                    self.InverseVariance = [1.0/i for i in self.EstimatedVariance]
+                    self.InverseStandardDeviation = [1.0/i for i in self.EstimatedStandardDeviation]
+                    self.CubicInterpolatedVariance = self.GetCubicInterpolatedVariance()
+                    self.CubicInterpolatedStandardDeviation = self.GetCubicSplineInterpolatedStandardDeviation()
+                    self.GridVariance = self.GetGridVariance()
+                    self.InterpolatedRange = (self.minPrice,self.maxPrice)
+                    self.InterpolationBubbleTestResult = self.InterpolationBubbleTest(self.EstimatedVariance, self.StockPrices)
+                    self.InterpolationBubbleTest = self.InterpolationBubbleTestResult <= 0  #if true, the not a bubble.  if false, then perhaps a bubble.
+        
+    def InterpolationBubbleTest(self, EV, SP):
+        '''
+        Description:
+            Test 1: Test the slope of the floren-Zmirou volatility estimator
+            Test procedure:
+                1)  Calculate the numerical estimation of the derivative
+                2)  Calculate numerical estimate of mean value theorem.
+        input:
+            Estimated Variance     - EV
+            Stock Prices           - SP
+        output:
+                            1      |\ b
+            sigma'(c) =   -----    |      sigma'(x) dx
+                          b - a   \|  a
+        '''
+        #self.EstimatedVariance = [self.Volatility_estimation(self.T,self.StockPrices,ex,self.n,self.h_n)**2 for ex in self.StockPrices]# these are the sigma values evulated at the grid points
+        xValues = SP
+        yValues = EV
+        derivative = [ (yValues[i] - yValues[i+1])/(xValues[i] - xValues[i+1]) for i in range(len(yValues)-1) if xValues[i] - xValues[i+1] != 0.0]
+        b = max(xValues)
+        a = min(xValues)
+        xCount = len(xValues)
+        h = (b-a)/(xCount-1.0)  #1 less value to evaluate for derivative
+        derivativeSum = sum(derivative)
+        integralValue = h * derivativeSum
+        meanValueTheorem = (1/(b-a)) * integralValue
+        return meanValueTheorem
+        
         
     def GetGridInverseStandardDeviation(self):
         '''
@@ -329,7 +361,7 @@ class FlorenZmirou(Stock,EulerMaruyama):
         gridPoints = self.UsableGridPoints
         estimatedSigma = self.EstimatedVariance
         #for i in range(len(gridPoints)):i
-	for gridPoint,StockPrices in self.StockPricesByGridPointDictionary.iteritems(): 
+        for gridPoint,StockPrices in self.StockPricesByGridPointDictionary.iteritems(): 
             table.append([str(gridPoint), str(self.Volatility_estimation(self.T,self.StockPrices,gridPoint,self.n,self.x_step_size(self.StockPrices)/2.0)**2), str(len(StockPrices))])
         out = sys.stdout
         return self.pprint_table(out, table)
